@@ -1,0 +1,11 @@
+[versions]
+# SLF4J releases: http://www.slf4j.org/news.html
+slf4j = "2.0.6"
+
+# Apache Arrow releases: https://arrow.apache.org/release/
+arrow = "10.0.1"
+
+[libraries]
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+arrow-vector = { module = "org.apache.arrow:arrow-vector", version.ref = "arrow" }
