@@ -1,7 +1,5 @@
 # arrow-playground
 
-NOT YET IMPLEMENTED
-
 📚 Learning and exploring Apache Arrow.
 
 > Apache Arrow is a cross-language development platform for in-memory analytics.
@@ -15,25 +13,21 @@ This project is a playground for me to learn and explore Apache Arrow with execu
 comments and notes.
 
 
-## Instructions
+## Standalone sub-projects
 
-Follow these instructions to build and run the example program.
+This repository illustrates different concepts, patterns and examples via standalone sub-projects. Each sub-project is
+completely independent of the others and do not depend on the root project. This _standalone sub-project constraint_
+forces the sub-projects to be complete and maximizes the reader's chances of successfully running, understanding, and
+re-using the code.
 
-1. Use Java 17
-2. Build and run the example program
-   * ```shell
-     ./gradlew run
-     ```
-   * The program output will look something like this:
-   * ```text
-     [main] INFO dgroomes.Runner - Let's learn about Apache Arrow!
-     [main] INFO org.apache.arrow.memory.BaseAllocator - Debug mode disabled.
-     [main] INFO org.apache.arrow.memory.DefaultAllocationManagerOption - allocation manager type not specified, using netty as the default type
-     [main] INFO org.apache.arrow.memory.CheckAllocator - Using DefaultAllocationManager at memory-netty/10.0.1/8975307e2967474540cbc8080869767000aee1f7/arrow-memory-netty-10.0.1.jar!/org/apache/arrow/memory/DefaultAllocationManagerFactory.class
-     [main] INFO dgroomes.Runner - ZIP code vector: [90210, 19106, 82190]
-     [main] INFO dgroomes.Runner - Population vector: [20700, 7043, 443]
-     [main] INFO dgroomes.Runner - The highest population is 20700 in ZIP code 90210
-     ```
+The sub-projects include:
+
+
+### `basic/`
+
+A runnable "hello world" program featuring Apache Arrow.
+
+See the README in [basic/](basic/).
 
 
 ## Wish List
@@ -42,6 +36,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 
 * [x] DONE Model ZIP code data in a small hardcoded vector. I like using ZIP code data to explore data products, like I do in
   [my other projects](https://github.com/dgroomes/cypher-playground#overview)
+* [x] DONE Split into subprojects
 * [ ] Sort the vector by population and query (binary search) for ZIP codes with a population in a given range. 
 * [ ] Incorporate a full copy of ZIP code data. 
 * [ ] Do something with a dictionary. Can I use a dictionary, keyed on the state codes?
