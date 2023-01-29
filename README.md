@@ -32,6 +32,7 @@ Follow these instructions to build and run the example program.
      [main] INFO org.apache.arrow.memory.CheckAllocator - Using DefaultAllocationManager at memory-netty/10.0.1/8975307e2967474540cbc8080869767000aee1f7/arrow-memory-netty-10.0.1.jar!/org/apache/arrow/memory/DefaultAllocationManagerFactory.class
      [main] INFO dgroomes.Runner - ZIP code vector: [90210, 19106, 82190]
      [main] INFO dgroomes.Runner - Population vector: [20700, 7043, 443]
+     [main] INFO dgroomes.Runner - The highest population is 20700 in ZIP code 90210
      ```
 
 
