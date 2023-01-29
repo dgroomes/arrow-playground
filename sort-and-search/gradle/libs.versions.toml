@@ -3,11 +3,11 @@
 slf4j = "2.0.6"
 
 # Apache Arrow releases: https://arrow.apache.org/release/
-arrow = "10.0.1"
+arrow = "11.0.0"
 
 # Jackson releases: https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 # Make sure to align with the major version of Jackson that Arrow uses.
-# See https://github.com/apache/arrow/blob/a6eabc2b890030578131aecc5e85900597d694a4/java/pom.xml#L39
+# See https://github.com/apache/arrow/blob/f10f5cfd1376fb0e602334588b3f3624d41dee7d/java/pom.xml#L39
 jackson = "2.13.5"
 
 [libraries]
