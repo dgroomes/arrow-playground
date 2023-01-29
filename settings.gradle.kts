@@ -24,3 +24,4 @@ rootProject.name = "arrow-playground"
 // You get code completion and project navigation out-of-the-box. Pretty slick!
 
 includeBuild("basic")
+includeBuild("sort-and-search")

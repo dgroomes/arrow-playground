@@ -6,13 +6,13 @@ import org.apache.arrow.vector.IntVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Please see the README for more information.
+ */
 public class Runner {
 
   private static final Logger log = LoggerFactory.getLogger(Runner.class);
 
-  /**
-   * Please see the README for more information.
-   */
   public static void main(String[] args) {
     log.info("Let's learn about Apache Arrow!");
 
