@@ -23,7 +23,7 @@ Follow these instructions to build and run the example program.
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
-* [ ] Sort the vector by population and query (binary search) for ZIP codes with a population in a given range.
+* [x] DONE Sort the vector (well, index-sort it) by population
 * [ ] Search the data (binary search)
 * [ ] It would be really cool to see the memory usage when the data is in-memory in the Java objects, then after it's been
   transferred into the Arrow vectors. I'll have to add some manual garbage collection calls and then maybe include some

@@ -1,9 +1,11 @@
-package dgroomes;
+package dgroomes.sortandsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import org.apache.arrow.algorithm.sort.DefaultVectorComparators;
+import org.apache.arrow.algorithm.sort.IndexSorter;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.IntVector;
@@ -62,7 +64,8 @@ public class Runner {
          IntVector zipCodeVector = new IntVector("zip-codes", allocator);
          VarCharVector cityNameVector = new VarCharVector("city-names", allocator);
          VarCharVector stateCodeVector = new VarCharVector("state-codes", allocator);
-         IntVector populationVector = new IntVector("populations", allocator)) {
+         IntVector populationVector = new IntVector("populations", allocator);
+         IntVector populationIndexVector = new IntVector("population-index", allocator)) {
 
       int zipValuesSize = zips.size();
 
@@ -82,10 +85,41 @@ public class Runner {
         populationVector.set(i, zip.population);
       }
 
-      log.info("Loaded {} ZIP codes into Apache Arrow vectors.", zipValuesSize);
-    }
+      zipCodeVector.setValueCount(zipValuesSize);
+      cityNameVector.setValueCount(zipValuesSize);
+      stateCodeVector.setValueCount(zipValuesSize);
+      populationVector.setValueCount(zipValuesSize);
 
-    // TODO Sort
-    // TODO Search
+      log.info("Loaded {} ZIP codes into Apache Arrow vectors.", zipValuesSize);
+
+      // Sort the population data.
+      //
+      // We're not going to actually mutate the population vector itself but we're going to create an "index vector"
+      // which is a sorted representation of the population vector. By way of example, the first element of the index
+      // vector might be 123, which means that the 123th element of the population vector has the smallest population.
+      IndexSorter<IntVector> populationIndexer = new IndexSorter<>();
+      populationIndexVector.setValueCount(zipValuesSize);
+      populationIndexer.sort(populationVector, populationIndexVector, new DefaultVectorComparators.IntComparator());
+
+      {
+        int idx = populationIndexVector.get(0);
+        int zip = zipCodeVector.get(idx);
+        String cityName = new String(cityNameVector.get(idx));
+        String stateCode = new String(stateCodeVector.get(idx));
+        int population = populationVector.get(idx);
+        log.info("The lowest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, population);
+      }
+
+      {
+        int idx = populationIndexVector.get(zipValuesSize - 1);
+        int zip = zipCodeVector.get(idx);
+        String cityName = new String(cityNameVector.get(idx));
+        String stateCode = new String(stateCodeVector.get(idx));
+        int population = populationVector.get(idx);
+        log.info("The highest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, population);
+      }
+
+      // TODO Search
+    }
   }
 }

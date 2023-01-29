@@ -13,12 +13,13 @@ dependencies {
     implementation(platform(libs.jackson.bom))
 
     implementation(libs.arrow.vector)
+    implementation(libs.arrow.algorithm)
     implementation(libs.arrow.memory.netty)
     implementation(libs.jackson.databind)
 }
 
 application {
-    mainClass.set("dgroomes.Runner")
+    mainClass.set("dgroomes.sortandsearch.Runner")
 }
 
 tasks {
