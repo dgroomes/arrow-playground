@@ -9,3 +9,4 @@ arrow = "10.0.1"
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 arrow-vector = { module = "org.apache.arrow:arrow-vector", version.ref = "arrow" }
+arrow-memory-netty = { module = "org.apache.arrow:arrow-memory-netty", version.ref = "arrow" }
