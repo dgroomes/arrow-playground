@@ -5,6 +5,7 @@ import org.apache.arrow.vector.VarCharVector;
 
 import java.util.Optional;
 
+import static dgroomes.sortandsearch.internal.BinaryVarCharSearcherOverIndex.Comparison.EQUAL_TO;
 import static dgroomes.sortandsearch.internal.Range.*;
 import static dgroomes.sortandsearch.internal.Split.*;
 
@@ -34,16 +35,15 @@ public class BinaryVarCharSearcherOverIndex {
           return checkPoint(left).or(() -> checkPoint(right));
         }
         case TrueSplit(var left, int middle, var right) -> {
-          var comparison = vectorValueAtIndex(middle).compareTo(target);
-          if (comparison > 0) {
-            // Found a value higher than the target. We need to search the lower half.
-            range = left;
-          } else if (comparison < 0) {
-            // Found a value lower than the target. We need to search the upper half.
-            range = right;
-          } else {
+          switch (targetComparedToMiddle(middle)) {
+            // The target is less than the middle point. We need to search the lower half.
+            case LESS_THAN -> range = left;
+            // The target is greater than the middle point. We need to search the upper half.
+            case GREATER_THAN -> range = right;
             // We found it!
-            return Optional.of(middle);
+            case EQUAL_TO -> {
+              return Optional.of(middle);
+            }
           }
         }
       }
@@ -61,5 +61,21 @@ public class BinaryVarCharSearcherOverIndex {
 
   private String vectorValueAtIndex(int index) {
     return new String(values.get(this.index.get(index)));
+  }
+
+  enum Comparison {
+    LESS_THAN, EQUAL_TO, GREATER_THAN
+  }
+
+  private Comparison targetComparedToMiddle(int index) {
+    String valueUnderTest = vectorValueAtIndex(index);
+    int comparison = target.compareTo(valueUnderTest);
+    if (comparison == 0) {
+      return EQUAL_TO;
+    } else if (comparison < 0) {
+      return Comparison.LESS_THAN;
+    } else {
+      return Comparison.GREATER_THAN;
+    }
   }
 }
