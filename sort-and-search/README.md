@@ -1,7 +1,5 @@
 # sort-and-search
 
-NOT YET IMPLEMENTED
-
 Sorting and searching vectors with Apache Arrow.
 
 
@@ -9,7 +7,7 @@ Sorting and searching vectors with Apache Arrow.
 
 Follow these instructions to build and run the example program.
 
-1. Use Java 17
+1. Use Java 19
 2. Build and run the example program
     * ```shell
       ./gradlew run
@@ -38,3 +36,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
   be to multiply into 100 parallel universes so we get closer to 300MB. We need to overshadow the normal Java memory
   usage which is very roughly 50MB??
 * [ ] Do something with a dictionary. Can I use a dictionary, keyed on the state codes?
+* [ ] Delete the city names from the example. It's a bit crowded. In my next subproject I'll add them back and model them
+  in Apache Arrow's table abstractions. That's a better fit.
+* [ ] Remove most of the fancy type-based search algorithm code to a different project. I got carried away (and quite lost)
+  while implementing these algorithms and I'm happy with the result. But this codebase is not appropriate to use Java
+  language preview features.
