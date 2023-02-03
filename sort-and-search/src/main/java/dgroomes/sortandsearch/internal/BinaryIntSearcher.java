@@ -4,21 +4,19 @@ import org.apache.arrow.vector.IntVector;
 
 public class BinaryIntSearcher extends AbstractBinarySearcher<Integer> {
   private final IntVector vector;
-  private final int target;
 
   public BinaryIntSearcher(IntVector vector, int target) {
-    super(vector.getValueCount());
+    super(vector.getValueCount(), target);
     this.vector = vector;
-    this.target = target;
   }
 
   @Override
-  Integer lookup(int index) {
+  protected Integer lookup(int index) {
     return vector.get(index);
   }
 
   @Override
-  int compare(Integer valueUnderTest) {
-    return target - valueUnderTest;
+  protected Comparison compare(Integer target, Integer valueUnderTest) {
+    return TypedComparator.INT_COMPARATOR.compare(target, valueUnderTest);
   }
 }

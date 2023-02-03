@@ -5,23 +5,21 @@ import org.apache.arrow.vector.IntVector;
 public class BinaryIntSearcherOverIndex extends AbstractBinarySearcher<Integer> {
   private final IntVector values;
   private final IntVector index;
-  private final int target;
 
   public BinaryIntSearcherOverIndex(IntVector values, IntVector index, int target) {
-    super(values.getValueCount());
+    super(values.getValueCount(), target);
     this.values = values;
     this.index = index;
-    this.target = target;
   }
 
   @Override
-  Integer lookup(int indexOfIndex) {
+  protected Integer lookup(int indexOfIndex) {
     int indexOfValue = this.index.get(indexOfIndex);
     return values.get(indexOfValue);
   }
 
   @Override
-  int compare(Integer valueUnderTest) {
-    return target - valueUnderTest;
+  protected Comparison compare(Integer target, Integer valueUnderTest) {
+    return TypedComparator.INT_COMPARATOR.compare(target, valueUnderTest);
   }
 }

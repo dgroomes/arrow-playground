@@ -9,21 +9,21 @@ public class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher<Strin
   private final String target;
 
   public BinaryVarCharSearcherOverIndex(VarCharVector values, IntVector index, String target) {
-    super(values.getValueCount());
+    super(values.getValueCount(), target);
     this.values = values;
     this.index = index;
     this.target = target;
   }
 
   @Override
-  String lookup(int indexOfIndex) {
+  protected String lookup(int indexOfIndex) {
     int indexOfValue = this.index.get(indexOfIndex);
     byte[] valueBytes = values.get(indexOfValue);
     return new String(valueBytes);
   }
 
   @Override
-  int compare(String valueUnderTest) {
-    return target.compareTo(valueUnderTest);
+  protected Comparison compare(String target, String valueUnderTest) {
+    return TypedComparator.STRING_COMPARATOR.compare(target, valueUnderTest);
   }
 }

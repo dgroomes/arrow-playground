@@ -2,7 +2,7 @@ package dgroomes.sortandsearch.internal;
 
 import java.util.Optional;
 
-import static dgroomes.sortandsearch.internal.Comparison.*;
+import static dgroomes.sortandsearch.internal.Comparison.EQUAL_TO;
 import static dgroomes.sortandsearch.internal.Range.*;
 import static dgroomes.sortandsearch.internal.Split.*;
 
@@ -14,9 +14,11 @@ import static dgroomes.sortandsearch.internal.Split.*;
 public abstract class AbstractBinarySearcher<T> {
 
   private final int size;
+  private final T target;
 
-  public AbstractBinarySearcher(int size) {
+  public AbstractBinarySearcher(int size, T target) {
     this.size = size;
+    this.target = target;
   }
 
   public Optional<Integer> search() {
@@ -34,7 +36,10 @@ public abstract class AbstractBinarySearcher<T> {
           return checkPoint(left).or(() -> checkPoint(right));
         }
         case TrueSplit(var left, int middle, var right) -> {
-          switch (targetComparedToElementAt(middle)) {
+          // Note to self: while Lisp-like languages are fun, and writing wide code instead of tall code is fun, I am continually
+          // reminded that having local variables is a big enabler for understanding the code while in the debugger.
+          Comparison comparison = targetComparedToElementAt(middle);
+          switch (comparison) {
             // The target is less than the middle point. We need to search the lower half.
             case LESS_THAN -> range = left;
             // The target is greater than the middle point. We need to search the upper half.
@@ -56,15 +61,15 @@ public abstract class AbstractBinarySearcher<T> {
    * @param index the "index-under-test
    * @return the "value-under-test"
    */
-  abstract T lookup(int index);
+  protected abstract T lookup(int index);
 
   /**
-   * In the style of {@link java.util.Comparator#compare}, return an integer that represents the comparison integer when
-   * comparing "target" to the "value-under-test".
+   * In the style of {@link TypedComparator}, return a {@link java.util.Comparator} that represents the comparison
+   * result when comparing "target" to the "value-under-test".
    * <p>
-   * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields -2.
+   * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields {@link Comparison#LESS_THAN}.
    */
-  abstract int compare(T valueUnderTest);
+  protected abstract Comparison compare(T target, T valueUnderTest);
 
   private Optional<Integer> checkPoint(int index) {
     if (targetComparedToElementAt(index) == EQUAL_TO) {
@@ -75,16 +80,7 @@ public abstract class AbstractBinarySearcher<T> {
   }
 
   private Comparison targetComparedToElementAt(int index) {
-    // Note to self: while Lisp-like languages are fun, and writing wide code instead of tall code is fun, I am continually
-    // reminded that having local variables is a big enabler for understanding the code while in the debugger.
     var valueUnderTest = lookup(index);
-    int comparison = compare(valueUnderTest);
-    if (comparison == 0) {
-      return EQUAL_TO;
-    } else if (comparison < 0) {
-      return LESS_THAN;
-    } else {
-      return GREATER_THAN;
-    }
+    return compare(target, valueUnderTest);
   }
 }
