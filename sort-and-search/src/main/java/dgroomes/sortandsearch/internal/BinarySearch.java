@@ -3,6 +3,8 @@ package dgroomes.sortandsearch.internal;
 import dgroomes.sortandsearch.internal.BinarySearchStepResult.*;
 import dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.OneSide;
 
+import java.util.function.Function;
+
 import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.TwoSided;
 import static dgroomes.sortandsearch.internal.Range.*;
 import static dgroomes.sortandsearch.internal.Split.*;
@@ -30,10 +32,6 @@ public class BinarySearch {
     };
   }
 
-  interface IndexComparator {
-    Comparison compare(int index);
-  }
-
   /**
    * Perform a single step of the binary search algorithm.
    * <p>
@@ -44,29 +42,36 @@ public class BinarySearch {
    * <p>
    * This implementation is somewhat silly, but it's great for learning.
    */
-  static BinarySearchStepResult binarySearchStep(Range range, IndexComparator indexComparator) {
+  static <T> BinarySearchStepResult binarySearchStep(Range range, Function<Integer, T> lookup, TypedComparator<T> typedComparator, T target) {
     Split split = split(range);
 
     return switch (split) {
       case SplitPoint(Point(int index)) -> {
-        var comparison = indexComparator.compare(index);
+        T valueUnderTest = lookup.apply(index);
+        var comparison = typedComparator.compare(target, valueUnderTest);
         yield switch (comparison) {
           case EQUAL_TO -> new FoundExhausted(index);
           case LESS_THAN, GREATER_THAN -> new NotFoundExhausted();
         };
       }
       case SplitPointPair(PointPair(int left, int right)) -> {
-        var comparison = indexComparator.compare(left);
-        yield switch (comparison) {
+        T leftValueUnderTest = lookup.apply(left);
+        var leftComparison = typedComparator.compare(target, leftValueUnderTest);
+        yield switch (leftComparison) {
           case EQUAL_TO -> new Found(left, new OneSide(new Point(right)));
-          case LESS_THAN, GREATER_THAN -> switch (indexComparator.compare(right)) {
-            case EQUAL_TO -> new FoundExhausted(right);
-            case LESS_THAN, GREATER_THAN -> new NotFoundExhausted();
-          };
+          case LESS_THAN, GREATER_THAN -> {
+            T rightValueUnderTest = lookup.apply(right);
+            var rightComparison = typedComparator.compare(target, rightValueUnderTest);
+            yield switch (rightComparison) {
+              case EQUAL_TO -> new FoundExhausted(right);
+              case LESS_THAN, GREATER_THAN -> new NotFoundExhausted();
+            };
+          }
         };
       }
       case TrueSplit(var left, int middle, var right) -> {
-        var comparison = indexComparator.compare(middle);
+        T valueUnderTest = lookup.apply(middle);
+        var comparison = typedComparator.compare(target, valueUnderTest);
         yield switch (comparison) {
           case EQUAL_TO -> new Found(middle, new TwoSided(left, right));
           case LESS_THAN -> new TooHigh(left);

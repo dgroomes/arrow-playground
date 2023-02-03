@@ -40,7 +40,7 @@ public abstract class AbstractBinaryRangeSearcher<T> {
 
     while (!unsearchedRanges.isEmpty()) {
       Range toSearch = unsearchedRanges.remove();
-      BinarySearchStepResult stepResult = BinarySearch.binarySearchStep(toSearch, this::targetComparedToElementAt);
+      BinarySearchStepResult stepResult = BinarySearch.binarySearchStep(toSearch, this::lookup, this::compare, target);
 
       switch (stepResult) {
         case Found(int index, Unsearched unsearched) -> {
@@ -86,10 +86,5 @@ public abstract class AbstractBinaryRangeSearcher<T> {
       return;
     }
     unsearchedRanges.add(range);
-  }
-
-  private Comparison targetComparedToElementAt(int index) {
-    T valueUnderTest = lookup(index);
-    return compare(target, valueUnderTest);
   }
 }
