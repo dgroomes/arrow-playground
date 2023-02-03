@@ -3,16 +3,14 @@ package dgroomes.sortandsearch.internal;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
 
-public class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher<String> {
+public final class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher<String> {
   private final VarCharVector values;
   private final IntVector index;
-  private final String target;
 
   public BinaryVarCharSearcherOverIndex(VarCharVector values, IntVector index, String target) {
     super(values.getValueCount(), target);
     this.values = values;
     this.index = index;
-    this.target = target;
   }
 
   @Override

@@ -2,7 +2,7 @@ package dgroomes.sortandsearch.internal;
 
 import org.apache.arrow.vector.VarCharVector;
 
-public class BinaryRangeStringSearcher extends AbstractBinaryRangeSearcher<String> {
+public final class BinaryRangeStringSearcher extends AbstractBinaryRangeSearcher<String> {
   private final VarCharVector vector;
 
   public BinaryRangeStringSearcher(VarCharVector vector, String target) {

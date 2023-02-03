@@ -7,7 +7,7 @@ import org.apache.arrow.vector.IntVector;
  * classes, record classes, and pattern matching for switch (a language preview feature) are featured in the
  * implementation.
  */
-public class BinaryRangeIntSearcher extends AbstractBinaryRangeSearcher<Integer> {
+public final class BinaryRangeIntSearcher extends AbstractBinaryRangeSearcher<Integer> {
 
   private final IntVector vector;
 

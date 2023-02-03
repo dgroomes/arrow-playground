@@ -2,7 +2,7 @@ package dgroomes.sortandsearch.internal;
 
 import org.apache.arrow.vector.IntVector;
 
-public class BinaryIntSearcherOverIndex extends AbstractBinarySearcher<Integer> {
+public final class BinaryIntSearcherOverIndex extends AbstractBinarySearcher<Integer> {
   private final IntVector values;
   private final IntVector index;
 
