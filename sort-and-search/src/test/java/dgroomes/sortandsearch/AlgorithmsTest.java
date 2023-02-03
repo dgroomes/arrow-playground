@@ -300,6 +300,124 @@ class AlgorithmsTest {
     assertThat(foundIndex).isBetween(2, 4);
   }
 
+  @Test
+  void binaryRangeSearch_runOfSize1_inTheMiddle() {
+    IntVector vector = intVector(1, 2, 3);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(1);
+    assertThat(range.high()).isEqualTo(1);
+  }
+
+  @Test
+  void binaryRangeSearch_runOfSize2_inTheMiddle() {
+    IntVector vector = intVector(1, 2, 2, 3);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(1);
+    assertThat(range.high()).isEqualTo(2);
+  }
+
+  @Test
+  void binaryRangeSearch_runOfSize2_atThelow() {
+    IntVector vector = intVector(1, 1, 2);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(0);
+    assertThat(range.high()).isEqualTo(1);
+  }
+
+  @Test
+  void binaryRangeSearch_runOfSize2_atThehigh() {
+    IntVector vector = intVector(1, 2, 2);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(1);
+    assertThat(range.high()).isEqualTo(2);
+  }
+
+  @Test
+  void binaryRangeSearch_emptyVector() {
+    IntVector vector = intVector();
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
+
+    assertThat(found).isEmpty();
+  }
+
+  @Test
+  void binaryRangeSearch_oneElementVector() {
+    IntVector vector = intVector(1);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(0);
+    assertThat(range.high()).isEqualTo(0);
+  }
+
+  @Test
+  void binaryRangeSearch_large_range() {
+    IntVector vector = intVector(1, 1, 1, 1, 1);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(0);
+    assertThat(range.high()).isEqualTo(4);
+  }
+
+
+  @Test
+  void binaryRangeSearch_variegated() {
+    IntVector vector = intVector(2, 2, 3, 3, 3, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7);
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(0);
+      assertThat(range.high()).isEqualTo(1);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 3);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(2);
+      assertThat(range.high()).isEqualTo(4);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 5);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(5);
+      assertThat(range.high()).isEqualTo(9);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 7);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(10);
+      assertThat(range.high()).isEqualTo(16);
+    }
+  }
+
   /**
    * Convenience method to create an {@link IntVector}. I haven't been able to find utility methods like this in the
    * Arrow API. I would love to know the idiomatic way to create vectors for testing.

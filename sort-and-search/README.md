@@ -23,6 +23,11 @@ Follow these instructions to build and run the example program.
       [main] INFO dgroomes.sortandsearch.Runner - The lowest population ZIP code is 55450 (MINNEAPOLIS, MN) with a population of 0.
       [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 60623 (CHICAGO, IL) with a population of 112047.
       ```
+3. Run the tests
+    * ```shell
+      ./gradlew test
+      ``` 
+
 
 ## Wish List
 

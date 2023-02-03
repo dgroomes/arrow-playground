@@ -20,7 +20,7 @@ public abstract class AbstractBinarySearcher {
     Range range = of(0, size - 1);
 
     while (true) {
-      Split split = InternalAlgorithms.split(range);
+      Split split = BinarySearch.split(range);
       switch (split) {
         case SplitPoint(Point(int index)) -> {
           return checkPoint(index);

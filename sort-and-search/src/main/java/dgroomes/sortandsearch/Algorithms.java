@@ -1,6 +1,9 @@
 package dgroomes.sortandsearch;
 
-import dgroomes.sortandsearch.internal.*;
+import dgroomes.sortandsearch.internal.BinaryIntSearcher;
+import dgroomes.sortandsearch.internal.BinaryIntSearcherOverIndex;
+import dgroomes.sortandsearch.internal.BinaryRangeIntSearcher;
+import dgroomes.sortandsearch.internal.BinaryVarCharSearcherOverIndex;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
 
@@ -40,4 +43,27 @@ public class Algorithms {
   public static Optional<Integer> binarySearch(VarCharVector vector, IntVector index, String target) {
     return new BinaryVarCharSearcherOverIndex(vector, index, target).search();
   }
+
+  /**
+   * Binary search over a sorted vector of integers to produce a range of indices that all match the given "target"
+   * integer.
+   * <p>
+   * In other words, the sorted vector is expected to allow duplicates and you want to find the target value and all its
+   * duplicate neighbors (if they exist). This forms a range. For example, given the vector [1, 2, 2, 3], a search for
+   * 2 would return the range of indices [1, 2].
+   * <p>
+   * The range is inclusive and zero-indexed.
+   *
+   * @param vector a sorted vector of integers
+   * @param target the target value to search for
+   * @return an {@link Optional} containing the index of an occurrence of the target value in the vector. Or, an empty
+   * {@link Optional} if no occurrences could be found.
+   */
+  public static Optional<Range> binaryRangeSearch(IntVector vector, int target) {
+    var searcher = new BinaryRangeIntSearcher(vector, target);
+    var result = searcher.search();
+    return result.map(internalRange -> new Range(internalRange.low(), internalRange.high()));
+  }
+
+  public record Range(int low, int high) {}
 }
