@@ -7,21 +7,24 @@ import java.util.Optional;
 import java.util.Queue;
 
 import static dgroomes.sortandsearch.internal.BinarySearchStepResult.*;
-import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.*;
-import static dgroomes.sortandsearch.internal.Comparison.*;
+import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.OneSide;
+import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.TwoSided;
 
 /**
  * A generic binary search implementation to find all matches (a range) of a target value in a vector.
+ *
  * @param <T>
  */
 public abstract class AbstractBinaryRangeSearcher<T> {
 
   private final ValueVector vector;
+  private final T target;
   private final Queue<Range> unsearchedRanges = new LinkedList<>();
   private Range matchRange;
 
-  public AbstractBinaryRangeSearcher(ValueVector vector) {
+  public AbstractBinaryRangeSearcher(ValueVector vector, T target) {
     this.vector = vector;
+    this.target = target;
   }
 
   public Optional<Range> search() {
@@ -68,15 +71,15 @@ public abstract class AbstractBinaryRangeSearcher<T> {
    * @param index the "index-under-test
    * @return the "value-under-test"
    */
-  abstract T lookup(int index);
+  protected abstract T lookup(int index);
 
   /**
-   * In the style of {@link java.util.Comparator#compare}, return an integer that represents the comparison integer when
-   * comparing "target" to the "value-under-test".
+   * In the style of {@link TypedComparator}, return a {@link java.util.Comparator} that represents the comparison
+   * result when comparing "target" to the "value-under-test".
    * <p>
-   * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields -2.
+   * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields {@link Comparison#LESS_THAN}.
    */
-  abstract int compare(T valueUnderTest);
+  protected abstract Comparison compare(T target, T valueUnderTest);
 
   private void addUnsearchedRange(Range range) {
     if (matchRange != null && matchRange.contains(range)) {
@@ -87,13 +90,6 @@ public abstract class AbstractBinaryRangeSearcher<T> {
 
   private Comparison targetComparedToElementAt(int index) {
     T valueUnderTest = lookup(index);
-    int comparison = compare(valueUnderTest);
-    if (comparison == 0) {
-      return EQUAL_TO;
-    } else if (comparison < 0) {
-      return LESS_THAN;
-    } else {
-      return GREATER_THAN;
-    }
+    return compare(target, valueUnderTest);
   }
 }

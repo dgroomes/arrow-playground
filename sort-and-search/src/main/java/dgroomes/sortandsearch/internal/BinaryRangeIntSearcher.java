@@ -9,22 +9,20 @@ import org.apache.arrow.vector.IntVector;
  */
 public class BinaryRangeIntSearcher extends AbstractBinaryRangeSearcher<Integer> {
 
-  private final IntVector intVector;
-  private final int target;
+  private final IntVector vector;
 
   public BinaryRangeIntSearcher(IntVector vector, int target) {
-    super(vector);
-    this.intVector = vector;
-    this.target = target;
+    super(vector, target);
+    this.vector = vector;
   }
 
   @Override
-  Integer lookup(int index) {
-    return intVector.get(index);
+  protected Integer lookup(int index) {
+    return vector.get(index);
   }
 
   @Override
-  int compare(Integer valueUnderTest) {
-    return target - valueUnderTest;
+  protected Comparison compare(Integer target, Integer valueUnderTest) {
+    return TypedComparator.INT_COMPARATOR.compare(target, valueUnderTest);
   }
 }
