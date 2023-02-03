@@ -8,6 +8,7 @@ import static dgroomes.sortandsearch.internal.Split.*;
 
 /**
  * A generic binary search implementation.
+ *
  * @param <T>
  */
 public abstract class AbstractBinarySearcher<T> {
@@ -51,6 +52,7 @@ public abstract class AbstractBinarySearcher<T> {
   /**
    * Get the value of the element at the given index. This value is going to be compared to the "target" value and drive
    * the binary search in the right direction.
+   *
    * @param index the "index-under-test
    * @return the "value-under-test"
    */
@@ -59,11 +61,8 @@ public abstract class AbstractBinarySearcher<T> {
   /**
    * In the style of {@link java.util.Comparator#compare}, return an integer that represents the comparison integer when
    * comparing "target" to the "value-under-test".
-   *
+   * <p>
    * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields -2.
-   *
-   * @param valueUnderTest
-   * @return
    */
   abstract int compare(T valueUnderTest);
 
