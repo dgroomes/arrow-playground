@@ -55,6 +55,10 @@ public class BinarySearch {
         };
       }
       case SplitPointPair(PointPair(int left, int right)) -> {
+        // Note to self: while Lisp-like languages are fun, and writing wide code instead of tall code is fun, I am continually
+        // reminded that having local variables is a big enabler for understanding the code while in the debugger.
+        // In this particular case, I like to see "leftValueUnderTest" and "leftComparison even though it means that I
+        // have to name the later local variables "rightValueUnderTest" and "rightComparison", which is quite verbose.
         T leftValueUnderTest = lookup.apply(left);
         var leftComparison = typedComparator.compare(target, leftValueUnderTest);
         yield switch (leftComparison) {

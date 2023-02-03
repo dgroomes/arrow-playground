@@ -2,9 +2,8 @@ package dgroomes.sortandsearch.internal;
 
 import java.util.Optional;
 
-import static dgroomes.sortandsearch.internal.Comparison.EQUAL_TO;
-import static dgroomes.sortandsearch.internal.Range.*;
-import static dgroomes.sortandsearch.internal.Split.*;
+import static dgroomes.sortandsearch.internal.BinarySearchStepResult.*;
+import static dgroomes.sortandsearch.internal.Range.of;
 
 /**
  * A generic binary search implementation.
@@ -27,29 +26,20 @@ public abstract class AbstractBinarySearcher<T> {
     Range range = of(0, size - 1);
 
     while (true) {
-      Split split = BinarySearch.split(range);
-      switch (split) {
-        case SplitPoint(Point(int index)) -> {
-          return checkPoint(index);
+      BinarySearchStepResult stepResult = BinarySearch.binarySearchStep(range, this::lookup, this::compare, target);
+
+      switch (stepResult) {
+        case Found(int index, Unsearched ignored) -> {
+          return Optional.of(index);
         }
-        case SplitPointPair(PointPair(int left, int right)) -> {
-          return checkPoint(left).or(() -> checkPoint(right));
+        case FoundExhausted(int index) -> {
+          return Optional.of(index);
         }
-        case TrueSplit(var left, int middle, var right) -> {
-          // Note to self: while Lisp-like languages are fun, and writing wide code instead of tall code is fun, I am continually
-          // reminded that having local variables is a big enabler for understanding the code while in the debugger.
-          Comparison comparison = targetComparedToElementAt(middle);
-          switch (comparison) {
-            // The target is less than the middle point. We need to search the lower half.
-            case LESS_THAN -> range = left;
-            // The target is greater than the middle point. We need to search the upper half.
-            case GREATER_THAN -> range = right;
-            // We found it!
-            case EQUAL_TO -> {
-              return Optional.of(middle);
-            }
-          }
+        case NotFoundExhausted() -> {
+          return Optional.empty();
         }
+        case TooHigh(var unsearched) -> range = unsearched;
+        case TooLow(var unsearched) -> range = unsearched;
       }
     }
   }
@@ -70,17 +60,4 @@ public abstract class AbstractBinarySearcher<T> {
    * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields {@link Comparison#LESS_THAN}.
    */
   protected abstract Comparison compare(T target, T valueUnderTest);
-
-  private Optional<Integer> checkPoint(int index) {
-    if (targetComparedToElementAt(index) == EQUAL_TO) {
-      return Optional.of(index);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  private Comparison targetComparedToElementAt(int index) {
-    var valueUnderTest = lookup(index);
-    return compare(target, valueUnderTest);
-  }
 }
