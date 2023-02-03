@@ -418,6 +418,43 @@ class AlgorithmsTest {
     }
   }
 
+  @Test
+  void binaryRangeSearch_string_variegated() {
+    VarCharVector vector = varCharVector("a", "a", "b", "b", "b", "c", "c", "c", "c", "c", "d", "d", "d", "d", "d", "d", "d");
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, "a");
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(0);
+      assertThat(range.high()).isEqualTo(1);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, "b");
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(2);
+      assertThat(range.high()).isEqualTo(4);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, "c");
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(5);
+      assertThat(range.high()).isEqualTo(9);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, "d");
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(10);
+      assertThat(range.high()).isEqualTo(16);
+    }
+  }
+
   /**
    * Convenience method to create an {@link IntVector}. I haven't been able to find utility methods like this in the
    * Arrow API. I would love to know the idiomatic way to create vectors for testing.
