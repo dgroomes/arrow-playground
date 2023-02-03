@@ -6,6 +6,8 @@
 //
 //import static dgroomes.sortandsearch.internal.Comparison.*;
 //
+// ONE OF MY ORIGINAL ATTEMPTS! It's to be humbled.
+//
 //public class BinaryRangeIntSearcherOld {
 //  private final IntVector vector;
 //  private final int target;

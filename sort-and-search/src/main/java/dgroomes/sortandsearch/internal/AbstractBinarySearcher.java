@@ -2,11 +2,15 @@ package dgroomes.sortandsearch.internal;
 
 import java.util.Optional;
 
-import static dgroomes.sortandsearch.internal.Comparison.EQUAL_TO;
+import static dgroomes.sortandsearch.internal.Comparison.*;
 import static dgroomes.sortandsearch.internal.Range.*;
 import static dgroomes.sortandsearch.internal.Split.*;
 
-public abstract class AbstractBinarySearcher {
+/**
+ * A generic binary search implementation.
+ * @param <T>
+ */
+public abstract class AbstractBinarySearcher<T> {
 
   private final int size;
 
@@ -44,6 +48,25 @@ public abstract class AbstractBinarySearcher {
     }
   }
 
+  /**
+   * Get the value of the element at the given index. This value is going to be compared to the "target" value and drive
+   * the binary search in the right direction.
+   * @param index the "index-under-test
+   * @return the "value-under-test"
+   */
+  abstract T lookup(int index);
+
+  /**
+   * In the style of {@link java.util.Comparator#compare}, return an integer that represents the comparison integer when
+   * comparing "target" to the "value-under-test".
+   *
+   * For example, for a "target" of 3 and "value-under-test" of 5, the comparison yields -2.
+   *
+   * @param valueUnderTest
+   * @return
+   */
+  abstract int compare(T valueUnderTest);
+
   private Optional<Integer> checkPoint(int index) {
     if (targetComparedToElementAt(index) == EQUAL_TO) {
       return Optional.of(index);
@@ -52,5 +75,17 @@ public abstract class AbstractBinarySearcher {
     }
   }
 
-  protected abstract Comparison targetComparedToElementAt(int index);
+  private Comparison targetComparedToElementAt(int index) {
+    // Note to self: while Lisp-like languages are fun, and writing wide code instead of tall code is fun, I am continually
+    // reminded that having local variables is a big enabler for understanding the code while in the debugger.
+    var valueUnderTest = lookup(index);
+    int comparison = compare(valueUnderTest);
+    if (comparison == 0) {
+      return EQUAL_TO;
+    } else if (comparison < 0) {
+      return LESS_THAN;
+    } else {
+      return GREATER_THAN;
+    }
+  }
 }

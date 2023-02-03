@@ -2,9 +2,7 @@ package dgroomes.sortandsearch.internal;
 
 import org.apache.arrow.vector.IntVector;
 
-import static dgroomes.sortandsearch.internal.Comparison.*;
-
-public class BinaryIntSearcher extends AbstractBinarySearcher {
+public class BinaryIntSearcher extends AbstractBinarySearcher<Integer> {
   private final IntVector vector;
   private final int target;
 
@@ -15,15 +13,12 @@ public class BinaryIntSearcher extends AbstractBinarySearcher {
   }
 
   @Override
-  protected Comparison targetComparedToElementAt(int index) {
-    int valueUnderTest = vector.get(index);
-    int comparison = target - valueUnderTest;
-    if (comparison == 0) {
-      return EQUAL_TO;
-    } else if (comparison < 0) {
-      return LESS_THAN;
-    } else {
-      return GREATER_THAN;
-    }
+  Integer lookup(int index) {
+    return vector.get(index);
+  }
+
+  @Override
+  int compare(Integer valueUnderTest) {
+    return target - valueUnderTest;
   }
 }

@@ -70,7 +70,7 @@ public class BinaryRangeIntSearcher {
     unsearchedRanges.add(range);
   }
 
-  protected Comparison targetComparedToElementAt(int index) {
+  private Comparison targetComparedToElementAt(int index) {
     int valueUnderTest = vector.get(index);
     int comparison = target - valueUnderTest;
     if (comparison == 0) {

@@ -3,9 +3,7 @@ package dgroomes.sortandsearch.internal;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
 
-import static dgroomes.sortandsearch.internal.Comparison.*;
-
-public class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher {
+public class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher<String> {
   private final VarCharVector values;
   private final IntVector index;
   private final String target;
@@ -18,15 +16,14 @@ public class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher {
   }
 
   @Override
-  protected Comparison targetComparedToElementAt(int index) {
-    String valueUnderTest = new String(values.get(this.index.get(index)));
-    int comparison = target.compareTo(valueUnderTest);
-    if (comparison == 0) {
-      return EQUAL_TO;
-    } else if (comparison < 0) {
-      return LESS_THAN;
-    } else {
-      return GREATER_THAN;
-    }
+  String lookup(int indexOfIndex) {
+    int indexOfValue = this.index.get(indexOfIndex);
+    byte[] valueBytes = values.get(indexOfValue);
+    return new String(valueBytes);
+  }
+
+  @Override
+  int compare(String valueUnderTest) {
+    return target.compareTo(valueUnderTest);
   }
 }
