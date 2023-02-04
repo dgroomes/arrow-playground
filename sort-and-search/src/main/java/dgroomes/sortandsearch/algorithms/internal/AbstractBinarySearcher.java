@@ -1,10 +1,12 @@
 package dgroomes.sortandsearch.algorithms.internal;
 
-import dgroomes.sortandsearch.algorithms.*;
+import dgroomes.sortandsearch.algorithms.BinarySearch;
+import dgroomes.sortandsearch.algorithms.Comparison;
+import dgroomes.sortandsearch.algorithms.Range;
+import dgroomes.sortandsearch.algorithms.TypedComparator;
 
 import java.util.Optional;
 
-import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.*;
 import static dgroomes.sortandsearch.algorithms.Range.of;
 
 /**
@@ -27,23 +29,7 @@ public abstract class AbstractBinarySearcher<T> {
 
     Range range = of(0, size - 1);
 
-    while (true) {
-      BinarySearchStepResult stepResult = BinarySearch.binarySearchStep(range, this::lookup, this::compare, target);
-
-      switch (stepResult) {
-        case Found(int index, Unsearched ignored) -> {
-          return Optional.of(index);
-        }
-        case FoundExhausted(int index) -> {
-          return Optional.of(index);
-        }
-        case NotFoundExhausted() -> {
-          return Optional.empty();
-        }
-        case TooHigh(var unsearched) -> range = unsearched;
-        case TooLow(var unsearched) -> range = unsearched;
-      }
-    }
+    return BinarySearch.binarySearch(range, this::lookup, this::compare, target);
   }
 
   /**

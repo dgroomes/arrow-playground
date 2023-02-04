@@ -3,12 +3,44 @@ package dgroomes.sortandsearch.algorithms;
 import dgroomes.sortandsearch.algorithms.BinarySearchStepResult.*;
 import dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.OneSide;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.TwoSided;
 import static dgroomes.sortandsearch.algorithms.Range.*;
 
 public class BinarySearch {
+
+  /**
+   * Perform a binary search for a target value in a {@link Range}.
+   *
+   * @param range           the range of the search space. For example if you are searching a list of 10 elements, the range would be [0, 9].
+   * @param lookup          a function that takes an index and returns the value at that index in the search space. It is up to
+   *                        the caller to ensure that all indices in the range can be passed to this function.
+   * @param typedComparator a comparator that compares the target value to a value in the search space.
+   * @param target          the target value to search for.
+   * @param <T>             the type of the target value and the values in the search space.
+   * @return the index of the target value if it is found, otherwise an empty {@link Optional}.
+   */
+  public static <T> Optional<Integer> binarySearch(Range range, Function<Integer, T> lookup, TypedComparator<T> typedComparator, T target) {
+    while (true) {
+      BinarySearchStepResult stepResult = BinarySearch.binarySearchStep(range, lookup, typedComparator, target);
+
+      switch (stepResult) {
+        case Found(int index, Unsearched ignored) -> {
+          return Optional.of(index);
+        }
+        case FoundExhausted(int index) -> {
+          return Optional.of(index);
+        }
+        case NotFoundExhausted() -> {
+          return Optional.empty();
+        }
+        case TooHigh(var unsearched) -> range = unsearched;
+        case TooLow(var unsearched) -> range = unsearched;
+      }
+    }
+  }
 
   /**
    * Perform a single step of the binary search algorithm.
