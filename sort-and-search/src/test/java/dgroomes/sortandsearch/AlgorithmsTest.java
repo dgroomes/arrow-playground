@@ -351,6 +351,20 @@ class AlgorithmsTest {
   }
 
   @Test
+  void binaryRangeSearch_string_runOfSize2_inTheMiddle_indexedVector() {
+    VarCharVector values = varCharVector("b", "a", "c", "b");
+    IntVector index = intVector(1, 0, 3, 2);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, index, "b");
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(1);
+    assertThat(range.high()).isEqualTo(2);
+  }
+
+
+  @Test
   void binaryRangeSearch_int_runOfSize2_atTheStart() {
     IntVector vector = intVector(1, 1, 2);
 

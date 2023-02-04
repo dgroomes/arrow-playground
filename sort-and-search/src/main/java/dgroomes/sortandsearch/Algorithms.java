@@ -89,9 +89,20 @@ public class Algorithms {
    * indicates a sorted order of the indices of the elements in the "value" vector.
    */
   public static Optional<Range> binaryRangeSearch(IntVector values, IntVector index, int target) {
-    BinaryRangeIntSearcherOverIndex searcher = new BinaryRangeIntSearcherOverIndex(values, index, target);
+    var searcher = new BinaryRangeIntSearcherOverIndex(values, index, target);
     return searcher.search().map(internalRange -> new Range(internalRange.low(), internalRange.high()));
   }
+
+  /**
+   * Binary search over a sorted vector of strings to produce a range of indices that all match the given "target"
+   * string. The "values" vector itself does not contain elements in a sorted order but its accompanying index vector
+   * indicates a sorted order of the indices of the elements in the "value" vector.
+   */
+  public static Optional<Range> binaryRangeSearch(VarCharVector values, IntVector index, String target) {
+    var searcher = new BinaryRangeStringSearcherOverIndex(values, index, target);
+    return searcher.search().map(internalRange -> new Range(internalRange.low(), internalRange.high()));
+  }
+
 
   public record Range(int low, int high) {}
 }
