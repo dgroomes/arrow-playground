@@ -4,6 +4,10 @@ import java.util.Comparator;
 
 import static dgroomes.sortandsearch.algorithms.Comparison.*;
 
+/**
+ * This is a typed alternative to the classic {@link Comparator} interface.
+ * @param <T>
+ */
 @FunctionalInterface
 public interface TypedComparator<T> {
 

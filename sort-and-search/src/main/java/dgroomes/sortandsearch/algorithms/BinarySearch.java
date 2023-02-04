@@ -7,38 +7,16 @@ import java.util.function.Function;
 
 import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.TwoSided;
 import static dgroomes.sortandsearch.algorithms.Range.*;
-import static dgroomes.sortandsearch.algorithms.Split.*;
 
 public class BinarySearch {
 
   /**
-   * Split a range on a "middle" point. The result is three parts: a left side, a middle, and a right side.
-   * <p>
-   * Usefully, this method accommodates ranges without a middle (i.e. a point or a point pair).
-   */
-  public static Split split(Range range) {
-    return switch (range) {
-      // A point is not splittable.
-      case Point point -> new SplitPoint(point);
-      // A pair of points are not splittable.
-      case PointPair pointPair -> new SplitPointPair(pointPair);
-
-      case StretchRange(int low, int high) -> {
-        int middle = low + (high - low) / 2;
-        Range left = of(low, middle - 1);
-        Range right = of(middle + 1, high);
-        yield new TrueSplit(left, middle, right);
-      }
-    };
-  }
-
-  /**
    * Perform a single step of the binary search algorithm.
    * <p>
-   * Note: This method in combination with the related types ({@link Range}, {@link Split}, {@link Comparison} and
-   * {@link BinarySearchStepResult}) and "exhaustive checking" for switch expressions/statements has proven to be a good
-   * fundamental building block to build other binary search methods on top of. My goal was to learn more Java features,
-   * brush up on my algorithm skills, and also to reduce the pain of off-by-one errors.
+   * Note: This method in combination with the related types ({@link Range}, {@link Comparison} and {@link BinarySearchStepResult})
+   * and "exhaustive checking" for switch expressions/statements has proven to be a good fundamental building block to
+   * build other binary search methods on top of. My goal was to learn more Java features, brush up on my algorithm
+   * skills, and also to reduce the pain of off-by-one errors.
    * <p>
    * This implementation is somewhat silly, but it's great for learning.
    */
@@ -46,7 +24,7 @@ public class BinarySearch {
     Split split = split(range);
 
     return switch (split) {
-      case SplitPoint(Point(int index)) -> {
+      case Split.Point(int index) -> {
         T valueUnderTest = lookup.apply(index);
         var comparison = typedComparator.compare(target, valueUnderTest);
         yield switch (comparison) {
@@ -54,7 +32,7 @@ public class BinarySearch {
           case LESS_THAN, GREATER_THAN -> new NotFoundExhausted();
         };
       }
-      case SplitPointPair(PointPair(int left, int right)) -> {
+      case Split.PointPair(int left, int right) -> {
         // Note to self: while Lisp-like languages are fun, and writing wide code instead of tall code is fun, I am continually
         // reminded that having local variables is a big enabler for understanding the code while in the debugger.
         // In this particular case, I like to see "leftValueUnderTest" and "leftComparison even though it means that I
@@ -73,7 +51,7 @@ public class BinarySearch {
           }
         };
       }
-      case TrueSplit(var left, int middle, var right) -> {
+      case Split.TrueSplit(var left, int middle, var right) -> {
         T valueUnderTest = lookup.apply(middle);
         var comparison = typedComparator.compare(target, valueUnderTest);
         yield switch (comparison) {
@@ -81,6 +59,41 @@ public class BinarySearch {
           case LESS_THAN -> new TooHigh(left);
           case GREATER_THAN -> new TooLow(right);
         };
+      }
+    };
+  }
+
+  /**
+   * I'm struggling between calling this a "partition" or a "split" because partition is a strong, well-understood term
+   * but I really want to model the "middle point" and its two neighbors (left and right). And that's not really a partition
+   * right?
+   */
+  private sealed interface Split {
+
+    record Point(int index) implements Split {}
+
+    record PointPair(int left, int right) implements Split {}
+
+    record TrueSplit(Range left, int middle, Range right) implements Split {}
+  }
+
+  /**
+   * Split a range on a "middle" point. The result is three parts: a left side, a middle, and a right side.
+   * <p>
+   * Usefully, this method accommodates ranges without a middle (i.e. a point or a point pair).
+   */
+  private static Split split(Range range) {
+    return switch (range) {
+      // A point is not splittable.
+      case Point(int index) -> new Split.Point(index);
+      // A pair of points are not splittable.
+      case PointPair(int left, int right) -> new Split.PointPair(left, right);
+
+      case StretchRange(int low, int high) -> {
+        int middle = low + (high - low) / 2;
+        Range left = of(low, middle - 1);
+        Range right = of(middle + 1, high);
+        yield new Split.TrueSplit(left, middle, right);
       }
     };
   }
