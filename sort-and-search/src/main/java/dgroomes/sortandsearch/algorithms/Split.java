@@ -1,6 +1,6 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms;
 
-import static dgroomes.sortandsearch.internal.Range.*;
+import static dgroomes.sortandsearch.algorithms.Range.*;
 
 /**
  * I'm struggling between calling this a "partition" or a "split" because partition is a strong, well-understood term

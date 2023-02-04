@@ -1,5 +1,6 @@
-package dgroomes.sortandsearch;
+package dgroomes.sortandsearch.algorithms;
 
+import dgroomes.sortandsearch.algorithms.Algorithms;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.BaseValueVector;
 import org.apache.arrow.vector.IntVector;

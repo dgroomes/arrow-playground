@@ -1,4 +1,4 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms;
 
 sealed public interface Range {
 

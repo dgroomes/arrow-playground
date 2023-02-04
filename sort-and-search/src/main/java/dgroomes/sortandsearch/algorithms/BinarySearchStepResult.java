@@ -1,11 +1,11 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms;
 
 /**
  * This represents the result of a single step of the binary search algorithm. As a reminder, the binary search
  * algorithm picks a "middle" point from a sorted list of elements, inspects the element at that point, and determines
  * if it's a match, or if it's too low, or if it's too high.
  */
-sealed interface BinarySearchStepResult {
+sealed public interface BinarySearchStepResult {
 
   /**
    * This result indicates that the target value was found. In this case, elements on the left side may also be a match

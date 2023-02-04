@@ -1,8 +1,8 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms;
 
 import java.util.Comparator;
 
-import static dgroomes.sortandsearch.internal.Comparison.*;
+import static dgroomes.sortandsearch.algorithms.Comparison.*;
 
 @FunctionalInterface
 public interface TypedComparator<T> {

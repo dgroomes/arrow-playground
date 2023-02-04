@@ -1,5 +1,7 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms.internal;
 
+import dgroomes.sortandsearch.algorithms.Comparison;
+import dgroomes.sortandsearch.algorithms.TypedComparator;
 import org.apache.arrow.vector.IntVector;
 
 public final class BinaryIntSearcherOverIndex extends AbstractBinarySearcher<Integer> {

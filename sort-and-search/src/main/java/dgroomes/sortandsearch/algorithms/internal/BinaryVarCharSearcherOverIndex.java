@@ -1,15 +1,16 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms.internal;
 
+import dgroomes.sortandsearch.algorithms.Comparison;
+import dgroomes.sortandsearch.algorithms.TypedComparator;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
 
-public final class BinaryRangeStringSearcherOverIndex extends AbstractBinaryRangeSearcher<String> {
-
+public final class BinaryVarCharSearcherOverIndex extends AbstractBinarySearcher<String> {
   private final VarCharVector values;
   private final IntVector index;
 
-  public BinaryRangeStringSearcherOverIndex(VarCharVector values, IntVector index, String target) {
-    super(values, target);
+  public BinaryVarCharSearcherOverIndex(VarCharVector values, IntVector index, String target) {
+    super(values.getValueCount(), target);
     this.values = values;
     this.index = index;
   }
@@ -17,8 +18,8 @@ public final class BinaryRangeStringSearcherOverIndex extends AbstractBinaryRang
   @Override
   protected String lookup(int indexOfIndex) {
     int indexOfValue = this.index.get(indexOfIndex);
-    byte[] bytes = values.get(indexOfValue);
-    return new String(bytes);
+    byte[] valueBytes = values.get(indexOfValue);
+    return new String(valueBytes);
   }
 
   @Override

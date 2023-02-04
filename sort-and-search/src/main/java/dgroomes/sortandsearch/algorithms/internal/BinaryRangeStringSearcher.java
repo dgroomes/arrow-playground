@@ -1,5 +1,7 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms.internal;
 
+import dgroomes.sortandsearch.algorithms.Comparison;
+import dgroomes.sortandsearch.algorithms.TypedComparator;
 import org.apache.arrow.vector.VarCharVector;
 
 public final class BinaryRangeStringSearcher extends AbstractBinaryRangeSearcher<String> {

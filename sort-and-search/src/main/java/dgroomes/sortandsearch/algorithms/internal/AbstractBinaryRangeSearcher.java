@@ -1,14 +1,15 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms.internal;
 
+import dgroomes.sortandsearch.algorithms.*;
 import org.apache.arrow.vector.ValueVector;
 
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import static dgroomes.sortandsearch.internal.BinarySearchStepResult.*;
-import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.OneSide;
-import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.TwoSided;
+import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.*;
+import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.OneSide;
+import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.TwoSided;
 
 /**
  * A generic binary search implementation to find all matches (a range) of a target value in a vector.

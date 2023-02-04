@@ -1,9 +1,11 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms.internal;
+
+import dgroomes.sortandsearch.algorithms.*;
 
 import java.util.Optional;
 
-import static dgroomes.sortandsearch.internal.BinarySearchStepResult.*;
-import static dgroomes.sortandsearch.internal.Range.of;
+import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.*;
+import static dgroomes.sortandsearch.algorithms.Range.of;
 
 /**
  * A generic binary search implementation.

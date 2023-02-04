@@ -1,6 +1,6 @@
-package dgroomes.sortandsearch;
+package dgroomes.sortandsearch.algorithms;
 
-import dgroomes.sortandsearch.internal.*;
+import dgroomes.sortandsearch.algorithms.internal.*;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
 

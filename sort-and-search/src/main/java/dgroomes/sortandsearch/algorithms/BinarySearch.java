@@ -1,13 +1,13 @@
-package dgroomes.sortandsearch.internal;
+package dgroomes.sortandsearch.algorithms;
 
-import dgroomes.sortandsearch.internal.BinarySearchStepResult.*;
-import dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.OneSide;
+import dgroomes.sortandsearch.algorithms.BinarySearchStepResult.*;
+import dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.OneSide;
 
 import java.util.function.Function;
 
-import static dgroomes.sortandsearch.internal.BinarySearchStepResult.Unsearched.TwoSided;
-import static dgroomes.sortandsearch.internal.Range.*;
-import static dgroomes.sortandsearch.internal.Split.*;
+import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearched.TwoSided;
+import static dgroomes.sortandsearch.algorithms.Range.*;
+import static dgroomes.sortandsearch.algorithms.Split.*;
 
 public class BinarySearch {
 
@@ -42,7 +42,7 @@ public class BinarySearch {
    * <p>
    * This implementation is somewhat silly, but it's great for learning.
    */
-  static <T> BinarySearchStepResult binarySearchStep(Range range, Function<Integer, T> lookup, TypedComparator<T> typedComparator, T target) {
+  public static <T> BinarySearchStepResult binarySearchStep(Range range, Function<Integer, T> lookup, TypedComparator<T> typedComparator, T target) {
     Split split = split(range);
 
     return switch (split) {
