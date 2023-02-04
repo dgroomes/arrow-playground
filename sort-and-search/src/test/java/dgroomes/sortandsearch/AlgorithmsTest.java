@@ -301,7 +301,7 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_runOfSize1_inTheMiddle() {
+  void binaryRangeSearch_int_runOfSize1_inTheMiddle() {
     IntVector vector = intVector(1, 2, 3);
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
@@ -313,7 +313,20 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_runOfSize2_inTheMiddle() {
+  void binaryRangeSearch_int_runOfSize1_inTheMiddle_indexedVector() {
+    IntVector values = intVector(3, 2, 1);
+    IntVector index = intVector(2, 1, 0);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, index, 2);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(1);
+    assertThat(range.high()).isEqualTo(1);
+  }
+
+  @Test
+  void binaryRangeSearch_int_runOfSize2_inTheMiddle() {
     IntVector vector = intVector(1, 2, 2, 3);
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
@@ -325,7 +338,20 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_runOfSize2_atThelow() {
+  void binaryRangeSearch_int_runOfSize2_inTheMiddle_indexedVector() {
+    IntVector values = intVector(2, 1, 3, 2);
+    IntVector index = intVector(1, 0, 3, 2);
+
+    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, index, 2);
+
+    assertThat(found).isPresent();
+    Algorithms.Range range = found.get();
+    assertThat(range.low()).isEqualTo(1);
+    assertThat(range.high()).isEqualTo(2);
+  }
+
+  @Test
+  void binaryRangeSearch_int_runOfSize2_atTheStart() {
     IntVector vector = intVector(1, 1, 2);
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
@@ -337,7 +363,7 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_runOfSize2_atThehigh() {
+  void binaryRangeSearch_int_runOfSize2_atTheEnd() {
     IntVector vector = intVector(1, 2, 2);
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 2);
@@ -349,7 +375,7 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_emptyVector() {
+  void binaryRangeSearch_int_emptyVector() {
     IntVector vector = intVector();
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
@@ -358,7 +384,7 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_oneElementVector() {
+  void binaryRangeSearch_int_oneElementVector() {
     IntVector vector = intVector(1);
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
@@ -370,7 +396,7 @@ class AlgorithmsTest {
   }
 
   @Test
-  void binaryRangeSearch_large_range() {
+  void binaryRangeSearch_int_large_range() {
     IntVector vector = intVector(1, 1, 1, 1, 1);
 
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, 1);
@@ -382,7 +408,7 @@ class AlgorithmsTest {
 
 
   @Test
-  void binaryRangeSearch_variegated() {
+  void binaryRangeSearch_int_variegated() {
     IntVector vector = intVector(2, 2, 3, 3, 3, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7);
 
     {
@@ -448,6 +474,44 @@ class AlgorithmsTest {
 
     {
       Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(vector, "d");
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(10);
+      assertThat(range.high()).isEqualTo(16);
+    }
+  }
+
+  @Test
+  void binaryRangeSearch_int_variegated_indexedVector() {
+    IntVector values = intVector(2, 2, 3, 3, 3, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7);
+    IntVector index = intVector(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, index, 2);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(0);
+      assertThat(range.high()).isEqualTo(1);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, 3);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(2);
+      assertThat(range.high()).isEqualTo(4);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, 5);
+      assertThat(found).isPresent();
+      Algorithms.Range range = found.get();
+      assertThat(range.low()).isEqualTo(5);
+      assertThat(range.high()).isEqualTo(9);
+    }
+
+    {
+      Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(values, 7);
       assertThat(found).isPresent();
       Algorithms.Range range = found.get();
       assertThat(range.low()).isEqualTo(10);

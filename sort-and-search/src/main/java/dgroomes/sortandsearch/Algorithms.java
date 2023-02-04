@@ -83,6 +83,15 @@ public class Algorithms {
     return result.map(internalRange -> new Range(internalRange.low(), internalRange.high()));
   }
 
+  /**
+   * Binary search over a sorted vector of integers to produce a range of indices that all match the given "target"
+   * integer. The "values" vector itself does not contain elements in a sorted order but its accompanying index vector
+   * indicates a sorted order of the indices of the elements in the "value" vector.
+   */
+  public static Optional<Range> binaryRangeSearch(IntVector values, IntVector index, int target) {
+    BinaryRangeIntSearcherOverIndex searcher = new BinaryRangeIntSearcherOverIndex(values, index, target);
+    return searcher.search().map(internalRange -> new Range(internalRange.low(), internalRange.high()));
+  }
 
   public record Range(int low, int high) {}
 }
