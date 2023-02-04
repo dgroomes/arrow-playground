@@ -13,6 +13,11 @@ import static dgroomes.sortandsearch.algorithms.BinarySearchStepResult.Unsearche
 
 /**
  * A generic binary search implementation to find all matches (a range) of a target value in a vector.
+ * <p>
+ * Note: I tried pulling this out into a "functional" method, like {@link BinarySearch#binarySearch} but it was more
+ * verbose than this class. I think because this algorithm keeps track of a decent amount of state, like the "match range"
+ * and the "unsearched ranges" queue that it works well as a class. I think this is a good compromise because we're
+ * still getting lots of leverage out of the {@link BinarySearch#binarySearchStep} functional building block.
  *
  * @param <T>
  */
