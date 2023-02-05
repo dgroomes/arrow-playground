@@ -17,10 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -63,7 +61,7 @@ public class Runner {
         throw new RuntimeException("There was an error while reading the ZIP data from the file.", e);
       }
 
-      log.info("Read {} ZIP codes from the local file and into Java objects.", formatInteger(zips.size()));
+      log.info("Read {} ZIP codes from the local file and into Java objects.", Util.formatInteger(zips.size()));
     }
 
     // Multiplying the data for bigger effect
@@ -84,7 +82,7 @@ public class Runner {
 
       zips = multipliedZips;
 
-      log.info("Multiplied the ZIP code data by {} to get {} parallel universe ZIP codes.", PARALLEL_UNIVERSES, formatInteger(zips.size()));
+      log.info("Multiplied the ZIP code data by {} to get {} parallel universe ZIP codes.", PARALLEL_UNIVERSES, Util.formatInteger(zips.size()));
     }
 
     // Load the in-memory ZIP and city data from Java objects into Apache Arrow's in-memory data structures.
@@ -121,7 +119,7 @@ public class Runner {
       stateCodeVector.setValueCount(zipValuesSize);
       populationVector.setValueCount(zipValuesSize);
 
-      log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", formatInteger(zipValuesSize));
+      log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", Util.formatInteger(zipValuesSize));
 
       // Sort the population data.
       //
@@ -140,7 +138,7 @@ public class Runner {
         String cityName = new String(cityNameVector.get(idx));
         String stateCode = new String(stateCodeVector.get(idx));
         int population = populationVector.get(idx);
-        log.info("The highest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, formatInteger(population));
+        log.info("The highest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, Util.formatInteger(population));
       }
 
       // Sort the state codes names.
@@ -167,20 +165,15 @@ public class Runner {
     }
 
     Algorithms.Range range = found.get();
-    log.info("{} ZIP code entries are indexed in the range {}-{} in the state code index.", state, formatInteger(range.low()), formatInteger(range.high()));
+    log.info("{} ZIP code entries are indexed in the range {}-{} in the state code index.", state, Util.formatInteger(range.low()), Util.formatInteger(range.high()));
 
     // Sum up the population of all the ZIP codes in the state.
-    int population = IntStream.rangeClosed(range.low(), range.high()).map(stateCodesSortedIndexVector::get).sum();
-    String populationFormatted = formatInteger(population);
-    log.info("The population of {} is {}.", state, populationFormatted);
-  }
+    int population = IntStream.rangeClosed(range.low(), range.high())
+            .map(stateCodesSortedIndexVector::get)
+            .map(populationVector::get)
+            .sum();
 
-  /**
-   * Formats an integer value with commas.
-   * <p>
-   * For example, 1234567 becomes "1,234,567".
-   */
-  private static String formatInteger(int value) {
-    return NumberFormat.getNumberInstance(Locale.US).format(value);
+    String populationFormatted = Util.formatInteger(population);
+    log.info("The population of {} is {}.", state, populationFormatted);
   }
 }
