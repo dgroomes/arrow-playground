@@ -21,22 +21,29 @@ Follow these instructions to build and run the example program.
       ```
     * The program output will look something like this:
     * ```text
-      13:05:39 [main] INFO dgroomes.sortandsearch.Runner - Reading ZIP code data from the local file ...
-      13:05:39 [main] INFO dgroomes.sortandsearch.Runner - Read 29,353 ZIP codes from the local file and into Java objects.
-      13:05:40 [main] INFO dgroomes.sortandsearch.Runner - Multiplied the ZIP code data by 10 to get 322,883 parallel universe ZIP codes.
-      ... (snip) ...
-      13:05:40 [main] INFO dgroomes.sortandsearch.Runner - Loaded 322,883 ZIP codes into Apache Arrow vectors (arrays)
-      13:05:40 [main] INFO dgroomes.sortandsearch.Runner - Sorting the population data ...
-      13:05:40 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the population data.
-      13:05:40 [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 1060623 (10CHICAGO, 10IL) with a population of 1,120,470.
-      13:05:40 [main] INFO dgroomes.sortandsearch.Runner - Sorting the state codes ...
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the state codes.
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - California ZIP code entries are indexed in the range 295,140-296,655 in the state code index.
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - The population of California is 29,754,890.
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - Minnesota ZIP code entries are indexed in the range 306,176-307,057 in the state code index.
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - The population of Minnesota is 4,372,982.
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - Wyoming ZIP code entries are indexed in the range 322,743-322,882 in the state code index.
-      13:05:45 [main] INFO dgroomes.sortandsearch.Runner - The population of Wyoming is 453,528.
+      13:34:43 [main] INFO dgroomes.sortandsearch.Runner - Reading ZIP code data from the local file ...
+      13:34:43 [main] INFO dgroomes.sortandsearch.Runner - Read 29,353 ZIP codes from the local file and into Java objects.
+      13:34:45 [main] INFO dgroomes.sortandsearch.Runner - Multiplied the ZIP code data by 100 to get 2,964,653 parallel universe ZIP codes.
+      13:34:45 [main] INFO dgroomes.sortandsearch.Runner - Loaded 2,964,653 ZIP codes into Apache Arrow vectors (arrays)
+      13:34:45 [main] INFO dgroomes.sortandsearch.Runner - Sorting the population data ...
+      13:34:47 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the population data.
+      13:34:47 [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 10060623 (100CHICAGO, 100IL) with a population of 11,204,700.
+      13:34:47 [main] INFO dgroomes.sortandsearch.Runner - Sorting the state codes ...
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the state codes.
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - California ZIP code entries are indexed in the range 2,936,910-2,938,425 in the state code index.
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - The population of California is 29,754,890.
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - Minnesota ZIP code entries are indexed in the range 2,947,946-2,948,827 in the state code index.
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - The population of Minnesota is 4,372,982.
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - Wyoming ZIP code entries are indexed in the range 2,964,513-2,964,652 in the state code index.
+      13:35:36 [main] INFO dgroomes.sortandsearch.Runner - The population of Wyoming is 453,528.
+      13:35:37 [main] INFO dgroomes.sortandsearch.Runner - Found 21 ZIP codes in Minneapolis.
+      13:35:37 [main] INFO dgroomes.sortandsearch.Runner - Found 21 ZIP codes in Minneapolis.
+      13:35:37 [main] INFO dgroomes.sortandsearch.Runner - Found 1,551,163 ZIP codes with population greater than 100,000.
+      13:35:37 [main] INFO dgroomes.sortandsearch.Runner - Found 1,551,163 ZIP codes with population greater than 100,000.
+      13:35:38 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'POJO city scan' evaluated 100 times, produced a result hash of '04a623a4', and took PT1.124883S
+      13:35:43 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'Arrow VarCharVector city scan' evaluated 100 times, produced a result hash of '04a623a4', and took PT5.375228S
+      13:35:45 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'POJO population scan' evaluated 100 times, produced a result hash of '15410aeb', and took PT1.878973S
+      13:35:46 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'Arrow IntVector population scan' evaluated 100 times, produced a result hash of '15410aeb', and took PT1.147428S
       ```
 3. Run the tests
     * ```shell
@@ -58,8 +65,10 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Multiply the data into "parallel universes" so we can better see the effect of Arrow (spoiler: you pay an overhead
   for Arrow from Java so I see slower performance than just in-memory Java objects. My observations are naive though.
   This is only for my own discovery and learning.)
+* [x] DONE Benchmark "full data set scan" performance. Compare scanning of the POJO data to Arrow data. Results: POJO is much
+  faster for strings (a JVM optimization? Nice) and Arrow is slightly faster for integers.
 * [ ] Do something with a dictionary. Can I use a dictionary, keyed on the state codes?
-* [ ] Delete the city names from the example. It's a bit crowded. In my next subproject I'll add them back and model them
+* [x] OBSOLETE (Update: maybe not, because I used them to show the speed of varchar scanning) Delete the city names from the example. It's a bit crowded. In my next subproject I'll add them back and model them
   in Apache Arrow's table abstractions. That's a better fit.
 * [ ] Remove most of the fancy type-based search algorithm code to a different project. I got carried away (and quite lost)
   while implementing these algorithms and I'm happy with the result. But this codebase is not appropriate to use Java

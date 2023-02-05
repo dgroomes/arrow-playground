@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -28,15 +29,53 @@ import java.util.stream.Stream;
  */
 public class Runner {
 
-  public static final int PARALLEL_UNIVERSES = 10;
+  public static final int PARALLEL_UNIVERSES = 100;
   private static final Logger log = LoggerFactory.getLogger(Runner.class);
+  private List<Zip> zips;
+
+  private final IntVector zipCodeVector;
+  private final VarCharVector cityNameVector;
+  private final VarCharVector stateCodeVector;
+  private final IntVector populationVector;
+  private final IntVector populationSortedIndexVector;
+  private final IntVector stateCodesSortedIndexVector;
+
+  public Runner(IntVector zipCodeVector, VarCharVector cityNameVector, VarCharVector stateCodeVector, IntVector populationVector, IntVector populationSortedIndexVector, IntVector stateCodesSortedIndexVector) {
+    this.zipCodeVector = zipCodeVector;
+    this.cityNameVector = cityNameVector;
+    this.stateCodeVector = stateCodeVector;
+    this.populationVector = populationVector;
+    this.populationSortedIndexVector = populationSortedIndexVector;
+    this.stateCodesSortedIndexVector = stateCodesSortedIndexVector;
+  }
+
+  private record Zip(String zipCode, String cityName, String stateCode, int population) {}
 
   public static void main(String[] args) {
+
+    try (BufferAllocator allocator = new RootAllocator();
+         IntVector zipCodeVector = new IntVector("zip-codes", allocator);
+         VarCharVector cityNameVector = new VarCharVector("city-names", allocator);
+         VarCharVector stateCodeVector = new VarCharVector("state-codes", allocator);
+         IntVector populationVector = new IntVector("populations", allocator);
+         IntVector populationSortedIndexVector = new IntVector("population-index", allocator);
+         IntVector stateCodesSortedIndexVector = new IntVector("state-codes-index", allocator)) {
+
+      var runner = new Runner(zipCodeVector,
+              cityNameVector,
+              stateCodeVector,
+              populationVector,
+              populationSortedIndexVector,
+              stateCodesSortedIndexVector);
+
+      runner.execute();
+    }
+  }
+
+  public void execute() {
     log.info("Reading ZIP code data from the local file ...");
-    record Zip(String zipCode, String cityName, String stateCode, int population) {}
 
     // Read the ZIP code data from the local JSON file.
-    List<Zip> zips;
     {
       JsonMapper jsonMapper = JsonMapper.builder().propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).build();
 
@@ -65,6 +104,7 @@ public class Runner {
     }
 
     // Multiplying the data for bigger effect
+    int zipValuesSize;
     {
       ArrayList<Zip> multipliedZips = new ArrayList<>(zips);
 
@@ -81,21 +121,13 @@ public class Runner {
       }
 
       zips = multipliedZips;
+      zipValuesSize = zips.size();
 
       log.info("Multiplied the ZIP code data by {} to get {} parallel universe ZIP codes.", PARALLEL_UNIVERSES, Util.formatInteger(zips.size()));
     }
 
     // Load the in-memory ZIP and city data from Java objects into Apache Arrow's in-memory data structures.
-    try (BufferAllocator allocator = new RootAllocator();
-         IntVector zipCodeVector = new IntVector("zip-codes", allocator);
-         VarCharVector cityNameVector = new VarCharVector("city-names", allocator);
-         VarCharVector stateCodeVector = new VarCharVector("state-codes", allocator);
-         IntVector populationVector = new IntVector("populations", allocator);
-         IntVector populationSortedIndexVector = new IntVector("population-index", allocator);
-         IntVector stateCodesSortedIndexVector = new IntVector("state-codes-index", allocator)) {
-
-      int zipValuesSize = zips.size();
-
+    {
       zipCodeVector.allocateNew(zipValuesSize);
       // Notice that we don't set the size because we don't know how many bytes the city names and state codes are going
       // to take. This is the nature of using a variable-sized data type, like "var char".
@@ -120,7 +152,9 @@ public class Runner {
       populationVector.setValueCount(zipValuesSize);
 
       log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", Util.formatInteger(zipValuesSize));
+    }
 
+    {
       // Sort the population data.
       //
       // We're not going to actually mutate the population vector itself but we're going to create an "index vector"
@@ -131,31 +165,52 @@ public class Runner {
       populationSortedIndexVector.setValueCount(zipValuesSize);
       populationIndexer.sort(populationVector, populationSortedIndexVector, new DefaultVectorComparators.IntComparator());
       log.info("Done sorting the population data.");
+    }
 
-      {
-        int idx = populationSortedIndexVector.get(zipValuesSize - 1);
-        int zip = zipCodeVector.get(idx);
-        String cityName = new String(cityNameVector.get(idx));
-        String stateCode = new String(stateCodeVector.get(idx));
-        int population = populationVector.get(idx);
-        log.info("The highest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, Util.formatInteger(population));
-      }
+    {
+      int idx = populationSortedIndexVector.get(zipValuesSize - 1);
+      int zip = zipCodeVector.get(idx);
+      String cityName = new String(cityNameVector.get(idx));
+      String stateCode = new String(stateCodeVector.get(idx));
+      int population = populationVector.get(idx);
+      log.info("The highest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, Util.formatInteger(population));
+    }
 
-      // Sort the state codes names.
+    // Sort the state codes names.
+    {
       log.info("Sorting the state codes ...");
       IndexSorter<VarCharVector> stateCodeIndexer = new IndexSorter<>();
       stateCodesSortedIndexVector.setValueCount(zipValuesSize);
       stateCodeIndexer.sort(stateCodeVector, stateCodesSortedIndexVector, DefaultVectorComparators.createDefaultComparator(stateCodeVector));
       log.info("Done sorting the state codes.");
+    }
 
-      // Summarize the population of a few states.
+    // Summarize the population of a few states.
+    {
       summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "CA", "California");
       summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "MN", "Minnesota");
       summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "WY", "Wyoming");
     }
+
+    // Let's try scanning the data and see how fast it executes...
+    {
+      log.info(scanForMinneapolisZips_pojos());
+      log.info(scanForMinneapolisZips_arrow());
+      log.info(scanFor100kZips_pojos());
+      log.info(scanFor100kZips_arrow());
+    }
+
+    // Benchmark Arrow-based scans vs POJO-based scan...
+    {
+      int times = 100;
+      Util.benchmark("POJO city scan", this::scanForMinneapolisZips_pojos, times);
+      Util.benchmark("Arrow VarCharVector city scan", this::scanForMinneapolisZips_arrow, times);
+      Util.benchmark("POJO population scan", this::scanFor100kZips_pojos, times);
+      Util.benchmark("Arrow IntVector population scan", this::scanFor100kZips_arrow, times);
+    }
   }
 
-  private static void summarizeStatePopulation(VarCharVector stateCodeVector, IntVector populationVector, IntVector stateCodesSortedIndexVector, String stateCode, String state) {
+  private void summarizeStatePopulation(VarCharVector stateCodeVector, IntVector populationVector, IntVector stateCodesSortedIndexVector, String stateCode, String state) {
     // Get the range of state ZIP codes.
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(stateCodeVector, stateCodesSortedIndexVector, stateCode);
 
@@ -175,5 +230,71 @@ public class Runner {
 
     String populationFormatted = Util.formatInteger(population);
     log.info("The population of {} is {}.", state, populationFormatted);
+  }
+
+  /**
+   * Scan for ZIP codes in Minneapolis from the Java POJO data.
+   */
+  private String scanForMinneapolisZips_pojos() {
+    int minneapolisZips = 0;
+    for (var zip : zips) {
+      if ("MINNEAPOLIS".equals(zip.cityName())) {
+        minneapolisZips++;
+      }
+    }
+
+    return "Found %s ZIP codes in Minneapolis.".formatted(Util.formatInteger(minneapolisZips));
+  }
+
+
+  /**
+   * Scan for ZIP codes in Minneapolis from the Apache Arrow vector. How much faster/slower is it than the POJO-based
+   * scan? (It's about 3x to 4x slower I think because of the POJO-based scan is getting some JVM optimizations? Maybe
+   * string interning?? No idea.).
+   */
+  private String scanForMinneapolisZips_arrow() {
+    int minneapolisZips = 0;
+    int valueCount = cityNameVector.getValueCount();
+    byte[] minneapolisBytes = "MINNEAPOLIS".getBytes();
+
+    for (int i = 0; i < valueCount; i++) {
+      byte[] stateCode = cityNameVector.get(i);
+      if (Arrays.equals(minneapolisBytes, stateCode)) {
+        minneapolisZips++;
+      }
+    }
+
+    return "Found %s ZIP codes in Minneapolis.".formatted(Util.formatInteger(minneapolisZips));
+  }
+
+  private String scanFor100kZips_pojos() {
+    int count = 0;
+    for (var zip : zips) {
+      if (zip.population() >= 100_000) {
+        count++;
+      }
+    }
+
+    return "Found %s ZIP codes with population greater than 100,000.".formatted(Util.formatInteger(count));
+  }
+
+  /**
+   * Apache Arrow is a bit faster than the POJO-based scan. I'm expecting (naively?) that because the Arrow data is laid
+   * out "densely" (i.e. in a contiguous block of memory) that it's faster to scan through it.
+   * <p>
+   * <a href="https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background#the-costs-of-indirection">inspiration</a>
+   */
+  private String scanFor100kZips_arrow() {
+    int count = 0;
+    int valueCount = populationVector.getValueCount();
+
+    for (int i = 0; i < valueCount; i++) {
+      int population = populationVector.get(i);
+      if (population >= 100_000) {
+        count++;
+      }
+    }
+
+    return "Found %s ZIP codes with population greater than 100,000.".formatted(Util.formatInteger(count));
   }
 }
