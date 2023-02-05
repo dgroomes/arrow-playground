@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
  */
 public class Runner {
 
+  public static final int PARALLEL_UNIVERSES = 10;
   private static final Logger log = LoggerFactory.getLogger(Runner.class);
 
   public static void main(String[] args) {
@@ -62,6 +64,27 @@ public class Runner {
       }
 
       log.info("Read {} ZIP codes from the local file and into Java objects.", formatInteger(zips.size()));
+    }
+
+    // Multiplying the data for bigger effect
+    {
+      ArrayList<Zip> multipliedZips = new ArrayList<>(zips);
+
+      for (int parallelUniverse = 1; parallelUniverse < PARALLEL_UNIVERSES + 1; parallelUniverse++) {
+        for (Zip zip : zips) {
+          String parallelZipCode = "%d%s".formatted(parallelUniverse, zip.zipCode());
+          String parallelCityName = "%d%s".formatted(parallelUniverse, zip.cityName());
+          String parallelStateCode = "%d%s".formatted(parallelUniverse, zip.stateCode());
+          int parallelPopulation = zip.population() * parallelUniverse;
+
+          var parallelZip = new Zip(parallelZipCode, parallelCityName, parallelStateCode, parallelPopulation);
+          multipliedZips.add(parallelZip);
+        }
+      }
+
+      zips = multipliedZips;
+
+      log.info("Multiplied the ZIP code data by {} to get {} parallel universe ZIP codes.", PARALLEL_UNIVERSES, formatInteger(zips.size()));
     }
 
     // Load the in-memory ZIP and city data from Java objects into Apache Arrow's in-memory data structures.
@@ -105,9 +128,11 @@ public class Runner {
       // We're not going to actually mutate the population vector itself but we're going to create an "index vector"
       // which is a sorted representation of the population vector. By way of example, the first element of the index
       // vector might be 123, which means that the 123th element of the population vector has the smallest population.
+      log.info("Sorting the population data ...");
       IndexSorter<IntVector> populationIndexer = new IndexSorter<>();
       populationSortedIndexVector.setValueCount(zipValuesSize);
       populationIndexer.sort(populationVector, populationSortedIndexVector, new DefaultVectorComparators.IntComparator());
+      log.info("Done sorting the population data.");
 
       {
         int idx = populationSortedIndexVector.get(zipValuesSize - 1);
@@ -119,9 +144,11 @@ public class Runner {
       }
 
       // Sort the state codes names.
+      log.info("Sorting the state codes ...");
       IndexSorter<VarCharVector> stateCodeIndexer = new IndexSorter<>();
       stateCodesSortedIndexVector.setValueCount(zipValuesSize);
       stateCodeIndexer.sort(stateCodeVector, stateCodesSortedIndexVector, DefaultVectorComparators.createDefaultComparator(stateCodeVector));
+      log.info("Done sorting the state codes.");
 
       // Summarize the population of a few states.
       summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "CA", "California");
