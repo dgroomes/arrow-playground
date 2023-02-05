@@ -3,6 +3,13 @@
 Sorting and searching vectors with Apache Arrow.
 
 
+## Overview
+
+This is a runnable example project that showcases how to sort and search data in the Java implementation of Apache
+Arrow. In general, this is a "getting started" project for working with and manipulating data in the Arrow format for
+Java programmers.
+
+
 ## Instructions
 
 Follow these instructions to build and run the example program.
@@ -15,13 +22,16 @@ Follow these instructions to build and run the example program.
     * The program output will look something like this:
     * ```text
       [main] INFO dgroomes.sortandsearch.Runner - Reading ZIP code data from the local file ...
-      [main] INFO dgroomes.sortandsearch.Runner - Read 29353 ZIP codes from the local file and into Java objects.
-      [main] INFO org.apache.arrow.memory.BaseAllocator - Debug mode disabled.
-      [main] INFO org.apache.arrow.memory.DefaultAllocationManagerOption - allocation manager type not specified, using netty as the default type
-      [main] INFO org.apache.arrow.memory.CheckAllocator - Using DefaultAllocationManager at memory-netty/11.0.0/4e427a070f21efaffe6009faf6d97b260dbec36b/arrow-memory-netty-11.0.0.jar!/org/apache/arrow/memory/DefaultAllocationManagerFactory.class
-      [main] INFO dgroomes.sortandsearch.Runner - Loaded 29353 ZIP codes into Apache Arrow vectors.
-      [main] INFO dgroomes.sortandsearch.Runner - The lowest population ZIP code is 55450 (MINNEAPOLIS, MN) with a population of 0.
-      [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 60623 (CHICAGO, IL) with a population of 112047.
+      [main] INFO dgroomes.sortandsearch.Runner - Read 29,353 ZIP codes from the local file and into Java objects.
+      ... omitted ...
+      [main] INFO dgroomes.sortandsearch.Runner - Loaded 29,353 ZIP codes into Apache Arrow vectors (arrays)
+      [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 60623 (CHICAGO, IL) with a population of 112,047.
+      [main] INFO dgroomes.sortandsearch.Runner - California ZIP code entries are indexed in the range 1,610-3,125 in the state code index.
+      [main] INFO dgroomes.sortandsearch.Runner - The population of California is 41,616,474.
+      [main] INFO dgroomes.sortandsearch.Runner - Minnesota ZIP code entries are indexed in the range 12,646-13,527 in the state code index.
+      [main] INFO dgroomes.sortandsearch.Runner - The population of Minnesota is 14,721,903.
+      [main] INFO dgroomes.sortandsearch.Runner - Wyoming ZIP code entries are indexed in the range 29,213-29,352 in the state code index.
+      [main] INFO dgroomes.sortandsearch.Runner - The population of Wyoming is 3,573,430.
       ```
 3. Run the tests
     * ```shell
@@ -34,7 +44,7 @@ Follow these instructions to build and run the example program.
 General clean-ups, TODOs and things I wish to implement for this project:
 
 * [x] DONE Sort the vector (well, index-sort it) by population
-* [ ] IN PROGRESS Search the data (binary search)
+* [x] DONE Search the data (binary search)
 * [ ] It would be really cool to see the memory usage when the data is in-memory in the Java objects, then after it's been
   transferred into the Arrow vectors. I'll have to add some manual garbage collection calls and then maybe include some
   screenshots of visualvm. Is there a better way to do it? I'm not an expert. The data is only 3MB on disk so it might
