@@ -45,12 +45,6 @@ General clean-ups, TODOs and things I wish to implement for this project:
   [my other projects](https://github.com/dgroomes/cypher-playground#overview)
 * [x] DONE Split into subprojects
 * [x] DONE Incorporate a full copy of ZIP code data. 
-* [ ] (stretch goal) Model cyclic graphs in the data using the ["state adjacencies" of my cypher-playground](https://github.com/dgroomes/cypher-playground/blob/dc836b1ac934175394ece264c443bfae47465cd6/postgres-init/2-init-states-data.sql#L1)
-  and do a query by something like "find states adjacent to states that have at least a ZIP code with a population of 1,000,000"
-  (or a more illustrative query if you can think of one)
-* [ ] (stretch goal) Create a generic graph API plus a (overtly simple) query execution engine. The graph API only
-  supports schema-ful graphs (does this matter?). The query execution engine should prune the vector lists (i can't find
-  words for this right now). 
 
 
 ## Reference

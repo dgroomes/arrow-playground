@@ -2,7 +2,7 @@
 
 NOT YET IMPLEMENTED
 
-An ambitious application of Apache Arrow to model data as a graph and implement search algorithms with some optimization.
+An ambitious application of Apache Arrow to model data as an object graph and implement search algorithms with some optimization.
 
 
 ## Overview
@@ -27,12 +27,30 @@ Follow these instructions to build and run the example program:
      ```
 
 
+## Notes
+
+I'm using the word "graph" in the same way that so-called graph databases like Neo4J use the word "graph" but maybe I
+mean ["object databases"](https://en.wikipedia.org/wiki/Object_database), which are somewhat obscure but actually there
+is one modern one called [Realm](https://en.wikipedia.org/wiki/Realm_(database)) which is popular on mobile. Also I've
+been inspired by [Kuzu](https://github.com/kuzudb/kuzu) which is a property graph database but it has schemas (which I
+like) but doesn't that make it a traditional object database? I tried build Kuzu from source but had issues (it's
+extremely new; so that's ok) so maybe I'll try Realm (although it's also C++ so I'm scared). 
+
+
 ## Wish List
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
 * [x] DONE Model the data in Apache Arrow's table abstractions. Use `Table` even knowing it is experimental.
-* [ ] Placeholder
+* [ ] Model cyclic graphs in the data using the ["state adjacencies" of my cypher-playground](https://github.com/dgroomes/cypher-playground/blob/dc836b1ac934175394ece264c443bfae47465cd6/postgres-init/2-init-states-data.sql#L1)
+  and do a query by something like "find states adjacent to states that have at least a ZIP code with a population of 1,000,000"
+  (or a more illustrative query if you can think of one)
+* [ ] Create a generic graph API plus a (overtly simple) query execution engine. The graph API only
+  supports schema-ful graphs (does this matter?). The query execution engine should prune the vector lists (i can't find
+  words for this right now).
+* [ ] Consider loading data using Arrow's own (Java) APIs? It dosn't really matter, it's very easy to just load the data
+  with some hand-coded Jackson/file calls, but I generally want to learn any/all aspects of Arrow, unlimited.
+* [ ] Consider renaming the project to something like "object-query-engine" or something more specific/descriptive.
 
 
 ## Reference
