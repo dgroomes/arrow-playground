@@ -31,11 +31,13 @@ Follow these instructions to build and run the example program:
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
-* [ ] Model the data in Apache Arrow's table abstractions. Try to use the Vector  
+* [x] DONE Model the data in Apache Arrow's table abstractions. Use `Table` even knowing it is experimental.
+* [ ] Placeholder
 
 
 ## Reference
 
 * [Apache Arrow: *Tabular Data*](https://arrow.apache.org/docs/java/vector_schema_root.html)
   * The Arrow Java implementation has `VectorSchemaRoot` for modelling table-like data and that's pretty good. It has an
-    experimental `Table` type which seems like a better fit but I prefer to stick with stable types.
+    experimental `Table` type which seems like a better fit but I prefer to stick with stable types. Although
+    `VectorSchemaRoot` is pretty primitive, it's almost like it exists for data loading but not for data querying.

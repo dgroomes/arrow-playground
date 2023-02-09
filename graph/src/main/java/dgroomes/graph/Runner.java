@@ -8,6 +8,9 @@ import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
+import org.apache.arrow.vector.complex.reader.FieldReader;
+import org.apache.arrow.vector.table.Row;
+import org.apache.arrow.vector.table.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +29,18 @@ public class Runner {
 
   private static final Logger log = LoggerFactory.getLogger(Runner.class);
 
+  record Zip(String zipCode, String cityName, String stateCode, int population) {}
+
+  List<Zip> zips;
+
   public static void main(String[] args) {
+    new Runner().execute();
+  }
+
+  public void execute() {
     log.info("Reading ZIP code data from the local file ...");
-    record Zip(String zipCode, String cityName, String stateCode, int population) {}
 
     // Read the ZIP code data from the local JSON file.
-    List<Zip> zips;
     {
       JsonMapper jsonMapper = JsonMapper.builder().propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).build();
 
@@ -92,6 +101,37 @@ public class Runner {
       populationVector.setValueCount(zipValuesSize);
 
       log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", formatInteger(zipValuesSize));
+
+      // TODO turn it into an arrow table
+      try (Table zipTable = new Table(List.of(zipCodeVector, cityNameVector, stateCodeVector, populationVector), zipValuesSize)) {
+
+        // I want to scan the population vector and find the max value and then find the ZIP code, city, and state of
+        // that ZIP code. I think this is a basic thing to do in Arrow. The FieldReader interface has a huge API
+        // surface area.
+        //
+        // Let's iterate over a few rows.
+        int maxPopulation = -1;
+        int maxPopulationIndex = -1;
+
+        FieldReader populationReader = zipTable.getReader("populations");
+
+        for (int i = 0; i < zipValuesSize; i++) {
+          populationReader.setPosition(i);
+          int pop = populationReader.readInteger();
+          if (pop > maxPopulation) {
+            maxPopulation = pop;
+            maxPopulationIndex = populationReader.getPosition();
+          }
+        }
+
+        if (maxPopulationIndex == -1) {
+          throw new IllegalStateException("The max population index was never set.");
+        }
+
+        Row maxPopulationZip = zipTable.immutableRow().setPosition(maxPopulationIndex);
+
+        log.info("The ZIP code with the highest population is {} in {}, {} with a population of {}.", maxPopulationZip.getInt("zip-codes"), maxPopulationZip.getVarCharObj("city-names"), maxPopulationZip.getVarCharObj("state-codes"), formatInteger(maxPopulation));
+      }
 
       // TODO the rest (and hard part) of the program...
     }
