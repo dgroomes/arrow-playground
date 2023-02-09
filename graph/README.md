@@ -42,9 +42,11 @@ extremely new; so that's ok) so maybe I'll try Realm (although it's also C++ so 
 General clean-ups, TODOs and things I wish to implement for this project:
 
 * [x] DONE Model the data in Apache Arrow's table abstractions. Use `Table` even knowing it is experimental.
-* [ ] Model cyclic graphs in the data using the ["state adjacencies" of my cypher-playground](https://github.com/dgroomes/cypher-playground/blob/dc836b1ac934175394ece264c443bfae47465cd6/postgres-init/2-init-states-data.sql#L1)
+* [ ] IN PROGRESS Model cyclic graphs in the data using the ["state adjacencies" of my cypher-playground](https://github.com/dgroomes/cypher-playground/blob/dc836b1ac934175394ece264c443bfae47465cd6/postgres-init/2-init-states-data.sql#L1)
   and do a query by something like "find states adjacent to states that have at least a ZIP code with a population of 1,000,000"
   (or a more illustrative query if you can think of one)
+  * DONE Define the adjacencies data.
+  * IN PROGRESS Incorporate it into the Arrow data model.
 * [ ] Create a generic graph API plus a (overtly simple) query execution engine. The graph API only
   supports schema-ful graphs (does this matter?). The query execution engine should prune the vector lists (i can't find
   words for this right now).
