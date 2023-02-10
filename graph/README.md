@@ -46,7 +46,10 @@ General clean-ups, TODOs and things I wish to implement for this project:
   and do a query by something like "find states adjacent to states that have at least a ZIP code with a population of 1,000,000"
   (or a more illustrative query if you can think of one)
   * DONE Define the adjacencies data.
-  * IN PROGRESS Incorporate it into the Arrow data model.
+  * DONE Define the state data (code and name).
+  * Incorporate it into the Arrow data model.
+* [ ] Consider creating a utility module for creating Arrow vectors from Java objects. I can't tell if the Arrow Java APIs
+  are a bit primitive or I'm just not understanding it yet.
 * [ ] Create a generic graph API plus a (overtly simple) query execution engine. The graph API only
   supports schema-ful graphs (does this matter?). The query execution engine should prune the vector lists (i can't find
   words for this right now).

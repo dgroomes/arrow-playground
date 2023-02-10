@@ -102,7 +102,15 @@ public class Runner {
 
       log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", formatInteger(zipValuesSize));
 
-      // TODO turn it into an arrow table
+      // TODO load the state adjacencies into Apache Arrow vectors
+      // How should "many-to-may mapping data" be represented in Arrow data structures? I mean, I want a hash/dictionary
+      // but all Arrow has is vectors. It has a dictionary type but it's like a thin wrapper over vectors (I think).
+      // I think I want a vector of integer arrays to represent state to state adjacencies... not 100%.
+      //
+      // First, I need a vector of states.
+
+
+      // Turn it into an Arrow table
       try (Table zipTable = new Table(List.of(zipCodeVector, cityNameVector, stateCodeVector, populationVector), zipValuesSize)) {
 
         // I want to scan the population vector and find the max value and then find the ZIP code, city, and state of
