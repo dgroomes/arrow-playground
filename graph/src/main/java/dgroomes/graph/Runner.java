@@ -73,7 +73,20 @@ public class Runner {
          IntVector zipCodeVector = new IntVector("zip-codes", allocator);
          VarCharVector cityNameVector = new VarCharVector("city-names", allocator);
          VarCharVector stateCodeVector = new VarCharVector("state-codes", allocator);
-         IntVector populationVector = new IntVector("populations", allocator)) {
+         IntVector populationVector = new IntVector("populations", allocator);
+         VarCharVector stateStateCodeVector = new VarCharVector("state-state-codes", allocator);
+         VarCharVector stateStateNameVector = new VarCharVector("state-state-names", allocator)) {
+
+      // Load the state data into vectors
+      int statesSize = StateData.STATES.size();
+      for (int i = 0; i < statesSize; i++) {
+        StateData.State state = StateData.STATES.get(i);
+        stateStateCodeVector.setSafe(i, state.code().getBytes());
+        stateStateNameVector.setSafe(i, state.name().getBytes());
+      }
+
+      stateStateCodeVector.setValueCount(statesSize);
+      stateStateNameVector.setValueCount(statesSize);
 
       int zipValuesSize = zips.size();
 
@@ -93,6 +106,8 @@ public class Runner {
         populationVector.set(i, zip.population);
       }
 
+      // TODO figure out how to use the state data as a "dictionary encoding" or whatever in the ZIP code data.
+
       // Necessary boilerplate to tell Apache Arrow that we're done adding values to the vectors, and to restate the
       // number of values in each vector.
       zipCodeVector.setValueCount(zipValuesSize);
@@ -106,9 +121,6 @@ public class Runner {
       // How should "many-to-may mapping data" be represented in Arrow data structures? I mean, I want a hash/dictionary
       // but all Arrow has is vectors. It has a dictionary type but it's like a thin wrapper over vectors (I think).
       // I think I want a vector of integer arrays to represent state to state adjacencies... not 100%.
-      //
-      // First, I need a vector of states.
-
 
       // Turn it into an Arrow table
       try (Table zipTable = new Table(List.of(zipCodeVector, cityNameVector, stateCodeVector, populationVector), zipValuesSize)) {

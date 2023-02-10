@@ -47,9 +47,16 @@ General clean-ups, TODOs and things I wish to implement for this project:
   (or a more illustrative query if you can think of one)
   * DONE Define the adjacencies data.
   * DONE Define the state data (code and name).
-  * Incorporate it into the Arrow data model.
+  * DONE Incorporate the state data into the Arrow data model.
+  * How to relate the ZIP code "rows" to the entries in the state vector? I can do it by hand, but is this what Arrow's
+    dictionary encoder is for?
+  * Load the adjacencies data into vectors
 * [ ] Consider creating a utility module for creating Arrow vectors from Java objects. I can't tell if the Arrow Java APIs
   are a bit primitive or I'm just not understanding it yet.
+   * I think what I want is something like a builder type to express "hey given this list of Java objects of type `T`,
+     and these field extractors, create vectors for each of the fields using the field extractors". I want the creation
+     of the vectors to be expressed in the same code as the originating Java objects, instead of spreading out the vectors
+     initialization and population across a wide gap in code like I have now.
 * [ ] Create a generic graph API plus a (overtly simple) query execution engine. The graph API only
   supports schema-ful graphs (does this matter?). The query execution engine should prune the vector lists (i can't find
   words for this right now).
