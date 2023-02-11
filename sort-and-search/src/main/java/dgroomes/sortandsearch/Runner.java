@@ -199,22 +199,23 @@ public class Runner implements AutoCloseable {
     {
       // The first part is to populate a vector with the unique state codes.
       {
-        List<String> uniqueStateCodes = IntStream.range(0, zipValuesSize).mapToObj(stateCodeVector::get)
+        List<String> uniqueSortedStateCodes = IntStream.range(0, zipValuesSize).mapToObj(stateCodeVector::get)
                 .map(String::new)
                 .distinct()
+                .sorted()
                 .toList();
 
-        for (int i = 0; i < uniqueStateCodes.size(); i++) {
-          stateCodeUniqueVector.setSafe(i, uniqueStateCodes.get(i).getBytes());
+        for (int i = 0; i < uniqueSortedStateCodes.size(); i++) {
+          stateCodeUniqueVector.setSafe(i, uniqueSortedStateCodes.get(i).getBytes());
         }
 
-        stateCodeUniqueVector.setValueCount(uniqueStateCodes.size());
+        stateCodeUniqueVector.setValueCount(uniqueSortedStateCodes.size());
       }
 
       // Next we use the Apache Arrow Java types like "Dictionary" and "DictionaryEncoding". It's hard to understand
       // this intuitively so I suggest you read the official docs.
       {
-        var encoding = new DictionaryEncoding(1L, false, null);
+        var encoding = new DictionaryEncoding(1L, true, null);
         var dictionary = new Dictionary(stateCodeUniqueVector, encoding);
         var encoder = new DictionaryEncoder(dictionary, allocator);
         stateCodesEncodedVector = (BaseIntVector) encoder.encode(stateCodeVector);
@@ -260,20 +261,12 @@ public class Runner implements AutoCloseable {
       stateCodesSortedIndexVector.setValueCount(zipValuesSize);
       stateCodeIndexer.sort(stateCodesEncodedVector, stateCodesSortedIndexVector, new VectorValueComparator<>() {
 
-        private byte[] get(int index) {
-          long stateCodeDictionaryIndex = stateCodesEncodedVector.getValueAsLong(index);
-          return stateCodeUniqueVector.get((int) stateCodeDictionaryIndex);
-        }
-
         @Override
         public int compareNotNull(int index1, int index2) {
-          var a = get(index1);
-          var b = get(index2);
+          var a = stateCodesEncodedVector.getValueAsLong(index1);
+          var b = stateCodesEncodedVector.getValueAsLong(index2);
 
-          // You should think twice and really understand the correctness of a "logical byte comparison" procedure. For
-          // this program, it works, but I skipped a few steps of understanding how strings may be stored as bytes and
-          // I just went for it.
-          return Arrays.compare(a, b);
+          return Long.compare(a, b);
         }
 
         @Override
