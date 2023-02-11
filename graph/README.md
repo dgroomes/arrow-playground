@@ -63,6 +63,12 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [ ] Consider loading data using Arrow's own (Java) APIs? It dosn't really matter, it's very easy to just load the data
   with some hand-coded Jackson/file calls, but I generally want to learn any/all aspects of Arrow, unlimited.
 * [ ] Consider renaming the project to something like "object-query-engine" or something more specific/descriptive.
+* [ ] Consider moving the whole project out of the arrow-playground. I've learned the Java Arrow APIs decently already,
+  and this subproject doesn't further my Arrow learning. Instead, this subproject is more about algorithms and column-based
+  data. Because Java has a new [(preview) foreign memory API](https://openjdk.org/jeps/434) I can basically create my own
+  vectors with not much more code than it takes to use the Java Arrow APIs. I'd rather start exploring the Java foreign
+  memory API and even explore things like [this integer compression library](https://github.com/lemire/JavaFastPFOR) which
+  uses the also new [(incubating) Java vector API](https://openjdk.org/jeps/426).
 
 
 ## Reference

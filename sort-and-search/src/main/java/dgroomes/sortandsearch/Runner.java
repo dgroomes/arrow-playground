@@ -7,10 +7,16 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import dgroomes.sortandsearch.algorithms.Algorithms;
 import org.apache.arrow.algorithm.sort.DefaultVectorComparators;
 import org.apache.arrow.algorithm.sort.IndexSorter;
+import org.apache.arrow.algorithm.sort.VectorValueComparator;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
+import org.apache.arrow.vector.BaseIntVector;
 import org.apache.arrow.vector.IntVector;
+import org.apache.arrow.vector.ValueVector;
 import org.apache.arrow.vector.VarCharVector;
+import org.apache.arrow.vector.dictionary.Dictionary;
+import org.apache.arrow.vector.dictionary.DictionaryEncoder;
+import org.apache.arrow.vector.types.pojo.DictionaryEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,27 +32,48 @@ import java.util.stream.Stream;
 
 /**
  * Please see the README for more information.
+ *
+ * WARNING: This is some gnarly code. I haven't been able to fully grok the Apache Arrow Java APIs yet. I prioritized
+ * "learning by doing" so that's why the code is written in a mostly top-down procedural fashion and without much thought
+ * in encapsulation, variable naming, and the order of operations.
  */
-public class Runner {
+public class Runner implements AutoCloseable {
 
   public static final int PARALLEL_UNIVERSES = 100;
   private static final Logger log = LoggerFactory.getLogger(Runner.class);
   private List<Zip> zips;
 
+  private final BufferAllocator allocator;
   private final IntVector zipCodeVector;
   private final VarCharVector cityNameVector;
   private final VarCharVector stateCodeVector;
   private final IntVector populationVector;
   private final IntVector populationSortedIndexVector;
   private final IntVector stateCodesSortedIndexVector;
+  private final VarCharVector stateCodeUniqueVector;
+  private BaseIntVector stateCodesEncodedVector;
 
-  public Runner(IntVector zipCodeVector, VarCharVector cityNameVector, VarCharVector stateCodeVector, IntVector populationVector, IntVector populationSortedIndexVector, IntVector stateCodesSortedIndexVector) {
+  public Runner(BufferAllocator allocator,
+                IntVector zipCodeVector,
+                VarCharVector cityNameVector,
+                VarCharVector stateCodeVector,
+                IntVector populationVector,
+                IntVector populationSortedIndexVector,
+                IntVector stateCodesSortedIndexVector,
+                VarCharVector stateCodeUniqueVector) {
+    this.allocator = allocator;
     this.zipCodeVector = zipCodeVector;
     this.cityNameVector = cityNameVector;
     this.stateCodeVector = stateCodeVector;
     this.populationVector = populationVector;
     this.populationSortedIndexVector = populationSortedIndexVector;
     this.stateCodesSortedIndexVector = stateCodesSortedIndexVector;
+    this.stateCodeUniqueVector = stateCodeUniqueVector;
+  }
+
+  @Override
+  public void close() {
+    Optional.ofNullable(stateCodesEncodedVector).ifPresent(ValueVector::close);
   }
 
   private record Zip(String zipCode, String cityName, String stateCode, int population) {}
@@ -56,19 +83,32 @@ public class Runner {
     try (BufferAllocator allocator = new RootAllocator();
          IntVector zipCodeVector = new IntVector("zip-codes", allocator);
          VarCharVector cityNameVector = new VarCharVector("city-names", allocator);
+
+         // We're going to apply a dictionary to the state codes data.
+         //
+         // The 'state-codes' vector represents an unencoded version of the state codes for each ZIP entry. For example,
+         // there will be many entries for the same value (like 'MN', 'CA', 'NY') because there are many ZIP codes in
+         // each state. So this should be a good candidate for dictionary encoding. From this unencoded vector, we'll
+         // create a "dictionary" vector that contains only the unique values. Then we'll create an encoded version of
+         // the unencoded vector. Then, we should be able to drop the unencoded vector and save on memory!
          VarCharVector stateCodeVector = new VarCharVector("state-codes", allocator);
+         VarCharVector stateCodeUniqueVector = new VarCharVector("state-codes-unique", allocator);
+
          IntVector populationVector = new IntVector("populations", allocator);
          IntVector populationSortedIndexVector = new IntVector("population-index", allocator);
          IntVector stateCodesSortedIndexVector = new IntVector("state-codes-index", allocator)) {
 
-      var runner = new Runner(zipCodeVector,
+      try (var runner = new Runner(allocator,
+              zipCodeVector,
               cityNameVector,
               stateCodeVector,
               populationVector,
               populationSortedIndexVector,
-              stateCodesSortedIndexVector);
+              stateCodesSortedIndexVector,
+              stateCodeUniqueVector)) {
 
-      runner.execute();
+        runner.execute();
+      }
     }
   }
 
@@ -154,6 +194,41 @@ public class Runner {
       log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", Util.formatInteger(zipValuesSize));
     }
 
+    // Encode the "state codes" column of the ZIP code data (in this case, the encoding will also have a compression
+    // effect). There are a few parts to this.
+    {
+      // The first part is to populate a vector with the unique state codes.
+      {
+        List<String> uniqueStateCodes = IntStream.range(0, zipValuesSize).mapToObj(stateCodeVector::get)
+                .map(String::new)
+                .distinct()
+                .toList();
+
+        for (int i = 0; i < uniqueStateCodes.size(); i++) {
+          stateCodeUniqueVector.setSafe(i, uniqueStateCodes.get(i).getBytes());
+        }
+
+        stateCodeUniqueVector.setValueCount(uniqueStateCodes.size());
+      }
+
+      // Next we use the Apache Arrow Java types like "Dictionary" and "DictionaryEncoding". It's hard to understand
+      // this intuitively so I suggest you read the official docs.
+      {
+        var encoding = new DictionaryEncoding(1L, false, null);
+        var dictionary = new Dictionary(stateCodeUniqueVector, encoding);
+        var encoder = new DictionaryEncoder(dictionary, allocator);
+        stateCodesEncodedVector = (BaseIntVector) encoder.encode(stateCodeVector);
+      }
+
+      // At this point, in theory, we should be able to free the memory used by the "stateCodeVector" now that we've
+      // encoded it. Unfortunately, for this example program, I still need the original unencoded vector because we
+      // do a binary search over it and my binary search algorithm doesn't support "searching over a dictionary-encoded
+      // vector accompanied by a sorted index vector". In fact, the use-case described by that phrase is a good
+      // illustration of the levels-of-indirection that you need to deal with when working with vector data. There is
+      // a certain amount of "essential complexity" that you need to deal with. With some diligence, it's up to you to
+      // limit the amount of "accidental complexity" that you introduce.
+    }
+
     {
       // Sort the population data.
       //
@@ -171,25 +246,49 @@ public class Runner {
       int idx = populationSortedIndexVector.get(zipValuesSize - 1);
       int zip = zipCodeVector.get(idx);
       String cityName = new String(cityNameVector.get(idx));
-      String stateCode = new String(stateCodeVector.get(idx));
+      long stateCodeEncodedIdx = stateCodesEncodedVector.getValueAsLong(idx);
+      String stateCode = new String(stateCodeUniqueVector.get((int) stateCodeEncodedIdx));
       int population = populationVector.get(idx);
       log.info("The highest population ZIP code is {} ({}, {}) with a population of {}.", zip, cityName, stateCode, Util.formatInteger(population));
     }
 
-    // Sort the state codes names.
+    // Sort the "state codes" column. Because we encoded the original state codes data, we have to sort the encoded
+    // column. How do we do that?
     {
       log.info("Sorting the state codes ...");
-      IndexSorter<VarCharVector> stateCodeIndexer = new IndexSorter<>();
+      IndexSorter<ValueVector> stateCodeIndexer = new IndexSorter<>();
       stateCodesSortedIndexVector.setValueCount(zipValuesSize);
-      stateCodeIndexer.sort(stateCodeVector, stateCodesSortedIndexVector, DefaultVectorComparators.createDefaultComparator(stateCodeVector));
+      stateCodeIndexer.sort(stateCodesEncodedVector, stateCodesSortedIndexVector, new VectorValueComparator<>() {
+
+        private byte[] get(int index) {
+          long stateCodeDictionaryIndex = stateCodesEncodedVector.getValueAsLong(index);
+          return stateCodeUniqueVector.get((int) stateCodeDictionaryIndex);
+        }
+
+        @Override
+        public int compareNotNull(int index1, int index2) {
+          var a = get(index1);
+          var b = get(index2);
+
+          // You should think twice and really understand the correctness of a "logical byte comparison" procedure. For
+          // this program, it works, but I skipped a few steps of understanding how strings may be stored as bytes and
+          // I just went for it.
+          return Arrays.compare(a, b);
+        }
+
+        @Override
+        public VectorValueComparator<ValueVector> createNew() {
+          return null;
+        }
+      });
       log.info("Done sorting the state codes.");
     }
 
     // Summarize the population of a few states.
     {
-      summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "CA", "California");
-      summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "MN", "Minnesota");
-      summarizeStatePopulation(stateCodeVector, populationVector, stateCodesSortedIndexVector, "WY", "Wyoming");
+      summarizeStatePopulation("CA", "California");
+      summarizeStatePopulation("MN", "Minnesota");
+      summarizeStatePopulation("WY", "Wyoming");
     }
 
     // Let's try scanning the data and see how fast it executes...
@@ -210,7 +309,7 @@ public class Runner {
     }
   }
 
-  private void summarizeStatePopulation(VarCharVector stateCodeVector, IntVector populationVector, IntVector stateCodesSortedIndexVector, String stateCode, String state) {
+  private void summarizeStatePopulation(String stateCode, String state) {
     // Get the range of state ZIP codes.
     Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(stateCodeVector, stateCodesSortedIndexVector, stateCode);
 
