@@ -14,41 +14,37 @@ Java programmers.
 
 Follow these instructions to build and run the example program.
 
-1. Use Java 19
+1. Use Java 17
 2. Build and run the example program
     * ```shell
       ./gradlew run
       ```
     * The program output will look something like this:
     * ```text
-      22:54:38 [main] INFO dgroomes.sortandsearch.Runner - Reading ZIP code data from the local file ...
-      22:54:38 [main] INFO dgroomes.sortandsearch.Runner - Read 29,353 ZIP codes from the local file and into Java objects.
-      22:54:40 [main] INFO dgroomes.sortandsearch.Runner - Multiplied the ZIP code data by 100 to get 2,964,653 parallel universe ZIP codes.
-      22:54:40 [main] INFO dgroomes.sortandsearch.Runner - Loaded 2,964,653 ZIP codes into Apache Arrow vectors (arrays)
-      22:54:41 [main] INFO dgroomes.sortandsearch.Runner - Sorting the population data ...
-      22:54:43 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the population data.
-      22:54:43 [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 10060623 (100CHICAGO, 100IL) with a population of 11,204,700.
-      22:54:43 [main] INFO dgroomes.sortandsearch.Runner - Sorting the state codes ...
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the state codes.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - California ZIP code entries are indexed in the range 2,936,910-2,938,425 in the state code index.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - The population of California is 29,754,890.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - Minnesota ZIP code entries are indexed in the range 2,947,946-2,948,827 in the state code index.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - The population of Minnesota is 4,372,982.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - Wyoming ZIP code entries are indexed in the range 2,964,513-2,964,652 in the state code index.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - The population of Wyoming is 453,528.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - Found 21 ZIP codes in Minneapolis.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - Found 21 ZIP codes in Minneapolis.
-      22:55:08 [main] INFO dgroomes.sortandsearch.Runner - Found 1,551,163 ZIP codes with population greater than 100,000.
-      22:55:09 [main] INFO dgroomes.sortandsearch.Runner - Found 1,551,163 ZIP codes with population greater than 100,000.
-      22:55:10 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'POJO city scan' evaluated 100 times, produced a result hash of '04a623a4', and took PT1.041348S
-      22:55:15 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'Arrow VarCharVector city scan' evaluated 100 times, produced a result hash of '04a623a4', and took PT5.160639S
-      22:55:16 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'POJO population scan' evaluated 100 times, produced a result hash of '15410aeb', and took PT1.727438S
-      22:55:18 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'Arrow IntVector population scan' evaluated 100 times, produced a result hash of '15410aeb', and took PT1.143581S
+      23:10:33 [main] INFO dgroomes.sortandsearch.Runner - Reading ZIP code data from the local file ...
+      23:10:33 [main] INFO dgroomes.sortandsearch.Runner - Read 29,353 ZIP codes from the local file and into Java objects.
+      23:10:34 [main] INFO dgroomes.sortandsearch.Runner - Multiplied the ZIP code data by 100 to get 2,964,653 parallel universe ZIP codes.
+      23:10:35 [main] INFO dgroomes.sortandsearch.Runner - Loaded 2,964,653 ZIP codes into Apache Arrow vectors (arrays)
+      23:10:35 [main] INFO dgroomes.sortandsearch.Runner - Sorting the population data ...
+      23:10:37 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the population data.
+      23:10:37 [main] INFO dgroomes.sortandsearch.Runner - The highest population ZIP code is 10060623 (100CHICAGO, 100IL) with a population of 11,204,700.
+      23:10:37 [main] INFO dgroomes.sortandsearch.Runner - Sorting the state codes ...
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - Done sorting the state codes.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - California ZIP code entries are indexed in the range 2,936,910-2,938,425 in the state code index.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - The population of California is 29,754,890.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - Minnesota ZIP code entries are indexed in the range 2,947,946-2,948,827 in the state code index.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - The population of Minnesota is 4,372,982.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - Wyoming ZIP code entries are indexed in the range 2,964,513-2,964,652 in the state code index.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - The population of Wyoming is 453,528.
+      23:11:01 [main] INFO dgroomes.sortandsearch.Runner - Found 21 ZIP codes in Minneapolis.
+      23:11:02 [main] INFO dgroomes.sortandsearch.Runner - Found 21 ZIP codes in Minneapolis.
+      23:11:02 [main] INFO dgroomes.sortandsearch.Runner - Found 1,551,163 ZIP codes with population greater than 100,000.
+      23:11:02 [main] INFO dgroomes.sortandsearch.Runner - Found 1,551,163 ZIP codes with population greater than 100,000.
+      23:11:03 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'POJO city scan' evaluated 100 times, produced a result hash of '04a623a4', and took PT1.170548S
+      23:11:08 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'Arrow VarCharVector city scan' evaluated 100 times, produced a result hash of '04a623a4', and took PT5.314022S
+      23:11:10 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'POJO population scan' evaluated 100 times, produced a result hash of '15410aeb', and took PT1.848237S
+      23:11:11 [main] INFO dgroomes.sortandsearch.Util - Benchmark 'Arrow IntVector population scan' evaluated 100 times, produced a result hash of '15410aeb', and took PT1.178733S
       ```
-3. Run the tests
-    * ```shell
-      ./gradlew test
-      ``` 
 
 
 ## Wish List
@@ -76,8 +72,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
   this commit. 
 * [x] OBSOLETE (Update: maybe not, because I used them to show the speed of varchar scanning) Delete the city names from the example. It's a bit crowded. In my next subproject I'll add them back and model them
   in Apache Arrow's table abstractions. That's a better fit.
-* [ ] IN PROGRESS Remove most of the fancy type-based search algorithm code to a different project. I got carried away (and quite lost)
+* [x] DONE Remove most of the fancy type-based search algorithm code to a different project. I got carried away (and quite lost)
   while implementing these algorithms and I'm happy with the result. But this codebase is not appropriate to use Java
   language preview features.
    * DONE use Arrow's built-in search algorithms
-   * Delete the custom algorithms and move back to Java 17 and without preview features.
+   * DONE Delete the custom algorithms and move back to Java 17 and without preview features.
