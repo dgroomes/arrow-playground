@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import dgroomes.sortandsearch.algorithms.Algorithms;
+import org.apache.arrow.algorithm.search.VectorRangeSearcher;
+import org.apache.arrow.algorithm.search.VectorSearcher;
 import org.apache.arrow.algorithm.sort.DefaultVectorComparators;
 import org.apache.arrow.algorithm.sort.IndexSorter;
 import org.apache.arrow.algorithm.sort.VectorValueComparator;
@@ -194,8 +195,10 @@ public class Runner implements AutoCloseable {
       log.info("Loaded {} ZIP codes into Apache Arrow vectors (arrays)", Util.formatInteger(zipValuesSize));
     }
 
-    // Encode the "state codes" column of the ZIP code data (in this case, the encoding will also have a compression
-    // effect). There are a few parts to this.
+    // Encode the "state codes" column of the ZIP code data.
+    // The encoding has a nice compression effect, for example "AK" becomes the number 0.
+    //
+    // There are a few parts to this procedure. Read carefully.
     {
       // The first part is to populate a vector with the unique state codes.
       {
@@ -221,18 +224,14 @@ public class Runner implements AutoCloseable {
         stateCodesEncodedVector = (BaseIntVector) encoder.encode(stateCodeVector);
       }
 
-      // At this point, in theory, we should be able to free the memory used by the "stateCodeVector" now that we've
-      // encoded it. Unfortunately, for this example program, I still need the original unencoded vector because we
-      // do a binary search over it and my binary search algorithm doesn't support "searching over a dictionary-encoded
-      // vector accompanied by a sorted index vector". In fact, the use-case described by that phrase is a good
-      // illustration of the levels-of-indirection that you need to deal with when working with vector data. There is
-      // a certain amount of "essential complexity" that you need to deal with. With some diligence, it's up to you to
-      // limit the amount of "accidental complexity" that you introduce.
+      // At this point, we can free the memory used by the "stateCodeVector" because we have the encoded version and the
+      // the "stateCodeUniqueVector" dictionary vector.  encoded it. Unfortunately, for this example program, I still need the original unencoded vector because we
+      // do a binary search over it and my binary search algorithm doesn't support
+       stateCodeVector.close();
     }
 
+    // Sort the population data.
     {
-      // Sort the population data.
-      //
       // We're not going to actually mutate the population vector itself but we're going to create an "index vector"
       // which is a sorted representation of the population vector. By way of example, the first element of the index
       // vector might be 123, which means that the 123th element of the population vector has the smallest population.
@@ -303,19 +302,68 @@ public class Runner implements AutoCloseable {
   }
 
   private void summarizeStatePopulation(String stateCode, String state) {
-    // Get the range of state ZIP codes.
-    Optional<Algorithms.Range> found = Algorithms.binaryRangeSearch(stateCodeVector, stateCodesSortedIndexVector, stateCode);
+    // Search for the range of state ZIP codes.
+    //
+    // This is a complicated procedure. We have to "search over a dictionary-encoded vector accompanied by a sorted
+    // index vector". The quoted scenario is a good illustration of the levels-of-indirection that you need to deal with
+    // when working with vector data. There is a certain amount of "essential complexity" that you need to deal with.
+    // With some diligence, it's up to you to limit the amount of "accidental complexity" that you introduce.
+    // Think about the domain data carefully, think about the data structures carefully, read the Arrow library code
+    // carefully and read this code carefully.
 
-    if (found.isEmpty()) {
+    // First, search for the index of the target state code in the "unique state codes" vector.
+    //
+    // To contribute to the complexity is that the Arrow VectorSearch.binarySearch method doesn't take a parameter that
+    // represents the "target" search value but instead takes a a whole vector paired with an index into that vector to
+    // represent that target value to search for. I suppose that might have saved the allocation of one object (?) but
+    // even then I don't think that's true. I could be wrong but I just don't get it. So, we have to create a temporary
+    // one-element vector to do a search.
+    int stateCodeIdx;
+    try (var temp = new VarCharVector("stateCode", allocator)) {
+
+      temp.allocateNew(1);
+      temp.set(0, stateCode.getBytes());
+      temp.setValueCount(1);
+
+      VectorValueComparator<VarCharVector> comparator = DefaultVectorComparators.createDefaultComparator(stateCodeUniqueVector);
+      stateCodeIdx = VectorSearcher.binarySearch(stateCodeUniqueVector, comparator, temp, 0);
+
+      if (stateCodeIdx == -1) {
+        var msg = "Did not find the state code '%s' in the unique state codes vector.".formatted(stateCode);
+        throw new IllegalStateException(msg);
+      }
+    }
+
+    // Now, we can start our search for the range of ZIP codes for the target state code. Usefully, Arrow provides
+    // a 'VectorRangeSearcher' class but interestingly it doesn't provide a one-shot range search. Instead, it provides
+    // a method to find the first occurrence of a value and a second method to find the last occurrence. With these, you
+    // can find the complete range.
+    var comparator = new VectorValueComparator<>() {
+
+      @Override
+      public int compareNotNull(int keyIndex, int targetIndex) {
+        // This is a bit mind-bending.
+        var targetStateCodeIndex = stateCodesEncodedVector.getValueAsLong((int) stateCodesSortedIndexVector.getValueAsLong(targetIndex));
+        return Long.compare(keyIndex, targetStateCodeIndex);
+      }
+
+      @Override
+      public VectorValueComparator<ValueVector> createNew() {
+        return null;
+      }
+    };
+    int first = VectorRangeSearcher.getFirstMatch(stateCodesSortedIndexVector, comparator, stateCodeUniqueVector, stateCodeIdx);
+    int last = VectorRangeSearcher.getLastMatch(stateCodesSortedIndexVector, comparator, stateCodeUniqueVector, stateCodeIdx);
+
+    if (first == -1 || last == -1) {
       log.info("No ZIP codes were found for the state of {} ('{}').", state, stateCode);
       return;
     }
 
-    Algorithms.Range range = found.get();
-    log.info("{} ZIP code entries are indexed in the range {}-{} in the state code index.", state, Util.formatInteger(range.low()), Util.formatInteger(range.high()));
+    log.info("{} ZIP code entries are indexed in the range {}-{} in the state code index.", state, Util.formatInteger(first), Util.formatInteger(last));
 
     // Sum up the population of all the ZIP codes in the state.
-    int population = IntStream.rangeClosed(range.low(), range.high())
+    int population = IntStream.rangeClosed(first, last)
             .map(stateCodesSortedIndexVector::get)
             .map(populationVector::get)
             .sum();
