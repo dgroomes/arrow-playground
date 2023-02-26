@@ -25,4 +25,3 @@ rootProject.name = "arrow-playground"
 
 includeBuild("basic")
 includeBuild("sort-and-search")
-includeBuild("graph")
