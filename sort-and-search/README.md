@@ -14,13 +14,13 @@ Java programmers.
 
 Follow these instructions to build and run the example program.
 
-1. Use Java 17
+1. Use Java 25
 2. Build and run the example program
-    * ```shell
+    - ```shell
       ./gradlew run
       ```
-    * The program output will look something like this:
-    * ```text
+    - The program output will look something like this:
+    - ```text
       23:10:33 [main] INFO dgroomes.sortandsearch.Runner - Reading ZIP code data from the local file ...
       23:10:33 [main] INFO dgroomes.sortandsearch.Runner - Read 29,353 ZIP codes from the local file and into Java objects.
       23:10:34 [main] INFO dgroomes.sortandsearch.Runner - Multiplied the ZIP code data by 100 to get 2,964,653 parallel universe ZIP codes.
@@ -51,29 +51,29 @@ Follow these instructions to build and run the example program.
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
-* [x] DONE Sort the vector (well, index-sort it) by population
-* [x] DONE Search the data (binary search)
-* [ ] It would be really cool to see the memory usage when the data is in-memory in the Java objects, then after it's been
+- [x] DONE Sort the vector (well, index-sort it) by population
+- [x] DONE Search the data (binary search)
+- [ ] It would be really cool to see the memory usage when the data is in-memory in the Java objects, then after it's been
   transferred into the Arrow vectors. I'll have to add some manual garbage collection calls and then maybe include some
   screenshots of visualvm. Is there a better way to do it? I'm not an expert. The data is only 3MB on disk so it might
   be to multiply into 100 parallel universes so we get closer to 300MB. We need to overshadow the normal Java memory
   usage which is very roughly 50MB??
-* [x] DONE Multiply the data into "parallel universes" so we can better see the effect of Arrow (spoiler: you pay an overhead
+- [x] DONE Multiply the data into "parallel universes" so we can better see the effect of Arrow (spoiler: you pay an overhead
   for Arrow from Java so I see slower performance than just in-memory Java objects. My observations are naive though.
   This is only for my own discovery and learning.)
-* [x] DONE Benchmark "full data set scan" performance. Compare scanning of the POJO data to Arrow data. Results: POJO is much
+- [x] DONE Benchmark "full data set scan" performance. Compare scanning of the POJO data to Arrow data. Results: POJO is much
   faster for strings (a JVM optimization? Nice) and Arrow is slightly faster for integers.
-* [x] DONE (Done but not with much intelligence) Do something with a dictionary. Can I use a dictionary, keyed on the state codes?
-   * Reference: <https://arrow.apache.org/docs/java/vector.html#dictionary-encoding>
-   * > Dictionary encoding is a form of compression where values of one type are replaced by values of a smaller type:
+- [x] DONE (Done but not with much intelligence) Do something with a dictionary. Can I use a dictionary, keyed on the state codes?
+   - Reference: <https://arrow.apache.org/docs/java/vector.html#dictionary-encoding>
+   - > Dictionary encoding is a form of compression where values of one type are replaced by values of a smaller type:
      > an array of ints replacing an array of strings is a common example. The mapping between the original values and the replacements is held in a ‘dictionary’.
-* [x] DONE (done; that's a nice effect. "Read-only-one-shot-data + dictionaries + vectors" means our dictionaries can be sorted)
+- [x] DONE (done; that's a nice effect. "Read-only-one-shot-data + dictionaries + vectors" means our dictionaries can be sorted)
   I think the dictionary vector itself can be sorted. That should speed up the sorting regression introduced in
   this commit. 
-* [x] OBSOLETE (Update: maybe not, because I used them to show the speed of varchar scanning) Delete the city names from the example. It's a bit crowded. In my next subproject I'll add them back and model them
+- [x] OBSOLETE (Update: maybe not, because I used them to show the speed of varchar scanning) Delete the city names from the example. It's a bit crowded. In my next subproject I'll add them back and model them
   in Apache Arrow's table abstractions. That's a better fit.
-* [x] DONE Remove most of the fancy type-based search algorithm code to a different project. I got carried away (and quite lost)
+- [x] DONE Remove most of the fancy type-based search algorithm code to a different project. I got carried away (and quite lost)
   while implementing these algorithms and I'm happy with the result. But this codebase is not appropriate to use Java
   language preview features.
-   * DONE use Arrow's built-in search algorithms
-   * DONE Delete the custom algorithms and move back to Java 17 and without preview features.
+   - DONE use Arrow's built-in search algorithms
+   - DONE Delete the custom algorithms and move back to Java 17 and without preview features.

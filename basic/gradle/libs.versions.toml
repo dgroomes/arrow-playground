@@ -2,7 +2,7 @@
 # SLF4J releases: http://www.slf4j.org/news.html
 slf4j = "2.0.17"
 
-# Apache Arrow releases: https://arrow.apache.org/release/ and https://mvnrepository.com/artifact/org.apache.arrow/arrow-vector
+# Apache Arrow releases: https://arrow.apache.org/release/ and https://github.com/apache/arrow-java/releases
 arrow = "18.3.0"
 
 [libraries]

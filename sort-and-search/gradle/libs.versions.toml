@@ -1,14 +1,14 @@
 [versions]
 # SLF4J releases: http://www.slf4j.org/news.html
-slf4j = "2.0.6"
+slf4j = "2.0.17"
 
-# Apache Arrow releases: https://arrow.apache.org/release/
-arrow = "11.0.0"
+# Apache Arrow releases: https://arrow.apache.org/release/ and https://github.com/apache/arrow-java/releases
+arrow = "18.3.0"
 
 # Jackson releases: https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 # Make sure to align with the major version of Jackson that Arrow uses.
-# See https://github.com/apache/arrow/blob/f10f5cfd1376fb0e602334588b3f3624d41dee7d/java/pom.xml#L39
-jackson = "2.13.5"
+# See https://github.com/apache/arrow-java/blob/8e84e4c8bbe041f362690e4ea54280ec682dbb1f/pom.xml#L102
+jackson = "2.18.3"
 
 
 [libraries]
