@@ -15,17 +15,13 @@ dependencies {
 }
 
 application {
-    mainClass.set("dgroomes.Runner")
-}
+    mainClass.set("Runner")
 
-tasks {
-    withType<JavaExec> {
-        jvmArgs = listOf(
-            // Apache Arrow accesses internal Java modules reflectively. These modules need to be "opened" during
-            // runtime.
-            //
-            // See https://arrow.apache.org/docs/java/install.html#java-compatibility
-            "--add-opens=java.base/java.nio=ALL-UNNAMED",
-        )
-    }
+    applicationDefaultJvmArgs = listOf(
+        // Apache Arrow accesses internal Java modules reflectively. These modules need to be "opened" during
+        // runtime.
+        //
+        // See https://arrow.apache.org/docs/java/install.html#java-compatibility
+        "--add-opens=java.base/java.nio=ALL-UNNAMED",
+    )
 }
