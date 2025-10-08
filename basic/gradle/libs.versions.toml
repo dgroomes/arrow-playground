@@ -1,9 +1,9 @@
 [versions]
 # SLF4J releases: http://www.slf4j.org/news.html
-slf4j = "2.0.6"
+slf4j = "2.0.17"
 
-# Apache Arrow releases: https://arrow.apache.org/release/
-arrow = "11.0.0"
+# Apache Arrow releases: https://arrow.apache.org/release/ and https://mvnrepository.com/artifact/org.apache.arrow/arrow-vector
+arrow = "18.3.0"
 
 [libraries]
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

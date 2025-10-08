@@ -7,7 +7,7 @@ A runnable "hello world" program featuring Apache Arrow.
 
 Follow these instructions to build and run the example program.
 
-1. Use Java 17
+1. Use Java 25
 2. Build and run the example program
     * ```shell
       ./gradlew run
